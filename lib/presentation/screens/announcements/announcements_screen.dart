@@ -17,35 +17,40 @@ class AnnouncementsScreen extends StatelessWidget {
     final announcements = [
       _AnnouncementData(
         title: 'Library Extended Hours During Exams',
-        body: 'The university library will remain open until 11 PM throughout the exam period. Additional study rooms are available on the 3rd floor.',
+        body:
+            'The university library will remain open until 11 PM throughout the exam period. Additional study rooms are available on the 3rd floor.',
         date: 'Apr 1, 2026',
         category: 'Academic',
         categoryColor: AppColors.tagAcademic,
       ),
       _AnnouncementData(
         title: 'Campus Wi-Fi Maintenance Notice',
-        body: 'Scheduled network maintenance will take place Saturday from 2-4 AM. Brief interruptions may occur across all buildings.',
+        body:
+            'Scheduled network maintenance will take place Saturday from 2-4 AM. Brief interruptions may occur across all buildings.',
         date: 'Mar 30, 2026',
         category: 'General',
         categoryColor: AppColors.tagGeneral,
       ),
       _AnnouncementData(
         title: 'Spring Basketball Tournament',
-        body: 'Registration is now open for the inter-department basketball tournament. Teams of 5 can sign up at the athletics office by Friday.',
+        body:
+            'Registration is now open for the inter-department basketball tournament. Teams of 5 can sign up at the athletics office by Friday.',
         date: 'Mar 28, 2026',
         category: 'Sports',
         categoryColor: AppColors.tagSports,
       ),
       _AnnouncementData(
         title: 'Emergency Drill Scheduled',
-        body: 'A campus-wide fire drill will be conducted on Wednesday at 10 AM. Please follow the posted evacuation routes from all buildings.',
+        body:
+            'A campus-wide fire drill will be conducted on Wednesday at 10 AM. Please follow the posted evacuation routes from all buildings.',
         date: 'Mar 27, 2026',
         category: 'Urgent',
         categoryColor: AppColors.tagUrgent,
       ),
       _AnnouncementData(
         title: 'New Cafeteria Menu Launch',
-        body: 'The campus cafeteria introduces a new healthy menu starting next Monday, featuring vegetarian and vegan options.',
+        body:
+            'The campus cafeteria introduces a new healthy menu starting next Monday, featuring vegetarian and vegan options.',
         date: 'Mar 25, 2026',
         category: 'General',
         categoryColor: AppColors.tagGeneral,
@@ -111,7 +116,8 @@ class _AnnouncementCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: '${data.category} announcement: ${data.title}, ${data.date}. ${data.body}',
+      label:
+          '${data.category} announcement: ${data.title}, ${data.date}. ${data.body}',
       button: true,
       child: Card(
         child: InkWell(
@@ -138,7 +144,10 @@ class _AnnouncementCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: data.categoryColor.withOpacity(0.12),
                             borderRadius: BorderRadius.circular(20),

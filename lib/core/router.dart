@@ -39,7 +39,7 @@ class AppRouter {
 
       // ── 404 Fallback ──
       default:
-      return _buildRoute(const NotFoundScreen(), settings);
+        return _buildRoute(const NotFoundScreen(), settings);
     }
   }
 
@@ -48,9 +48,6 @@ class AppRouter {
     Widget page,
     RouteSettings settings,
   ) {
-    return MaterialPageRoute(
-      builder: (_) => page,
-      settings: settings,
-    );
+    return MaterialPageRoute(builder: (_) => page, settings: settings);
   }
 }

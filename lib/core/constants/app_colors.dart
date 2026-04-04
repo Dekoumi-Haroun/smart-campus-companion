@@ -8,10 +8,10 @@ class AppColors {
   AppColors._();
 
   // ── Brand Colors ──
-  static const Color primary = Color(0xFF1565C0);       // University Blue
+  static const Color primary = Color(0xFF1565C0); // University Blue
   static const Color primaryLight = Color(0xFF5E92F3);
   static const Color primaryDark = Color(0xFF003C8F);
-  static const Color secondary = Color(0xFF26A69A);      // Teal accent
+  static const Color secondary = Color(0xFF26A69A); // Teal accent
   static const Color secondaryLight = Color(0xFF64D8CB);
   static const Color secondaryDark = Color(0xFF00766C);
 

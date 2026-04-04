@@ -116,7 +116,8 @@ class _EventCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: 'Event: ${data.title}, ${data.date}, ${data.time}, at ${data.location}',
+      label:
+          'Event: ${data.title}, ${data.date}, ${data.time}, at ${data.location}',
       button: true,
       child: Card(
         child: InkWell(
@@ -193,11 +194,7 @@ class _InfoRow extends StatelessWidget {
   final String text;
   final String? semanticLabel;
 
-  const _InfoRow({
-    required this.icon,
-    required this.text,
-    this.semanticLabel,
-  });
+  const _InfoRow({required this.icon, required this.text, this.semanticLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -215,8 +212,8 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
             ),
           ),
         ],
