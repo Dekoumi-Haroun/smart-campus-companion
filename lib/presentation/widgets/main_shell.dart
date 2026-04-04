@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+import '../../core/constants/app_strings.dart';
+import '../screens/home/home_screen.dart';
+import '../screens/announcements/announcements_screen.dart';
+import '../screens/events/events_screen.dart';
+import '../screens/settings/settings_screen.dart';
+
+/// The main shell widget that hosts the [BottomNavigationBar] and
+/// an [IndexedStack] for the four primary tabs.
+///
+/// Using [IndexedStack] ensures each tab's state is preserved when
+/// the user switches between tabs (scroll position, form inputs, etc.).
+class MainShell extends StatefulWidget {
+  const MainShell({super.key});
+
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell> {
+  int _currentIndex = 0;
+
+  // The four tab screens — order matches the BottomNavigationBar items.
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    AnnouncementsScreen(),
+    EventsScreen(),
+    SettingsScreen(),
+  ];
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  /// Handle Android back button: go to Home tab first, then exit.
+  Future<bool> _onWillPop() async {
+    if (_currentIndex != 0) {
+      setState(() {
+        _currentIndex = 0;
+      });
+      return false; // Don't exit the app
+    }
+    return true; // Exit the app
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        // IndexedStack keeps all children alive but only shows the active one.
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
+        bottomNavigationBar: Semantics(
+          label: 'Main navigation',
+          child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: _onTabTapped,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard_rounded),
+              activeIcon: Icon(Icons.dashboard_rounded),
+              label: AppStrings.navHome,
+              tooltip: 'Home dashboard',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.campaign_outlined),
+              activeIcon: Icon(Icons.campaign_rounded),
+              label: AppStrings.navAnnouncements,
+              tooltip: 'Campus announcements',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event_outlined),
+              activeIcon: Icon(Icons.event_rounded),
+              label: AppStrings.navEvents,
+              tooltip: 'Campus events',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings_outlined),
+              activeIcon: Icon(Icons.settings_rounded),
+              label: AppStrings.navSettings,
+              tooltip: 'App settings',
+            ),
+          ],
+        ),
+        ),
+      ),
+    );
+  }
+}
