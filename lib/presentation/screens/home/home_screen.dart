@@ -25,7 +25,9 @@ class HomeScreen extends StatelessWidget {
               child: IconButton(
                 icon: CircleAvatar(
                   radius: 18,
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.15),
+                  backgroundColor: theme.colorScheme.primary.withValues(
+                    alpha: 0.15,
+                  ),
                   child: Icon(
                     Icons.person_rounded,
                     color: theme.colorScheme.primary,
@@ -57,7 +59,7 @@ class HomeScreen extends StatelessWidget {
             Text(
               'Here\'s what\'s happening on campus today.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 24),
@@ -181,7 +183,7 @@ class _StatCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.5),
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -228,7 +230,7 @@ class _PlaceholderAnnouncementCard extends StatelessWidget {
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: tagColor.withOpacity(0.12),
+              color: tagColor.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(

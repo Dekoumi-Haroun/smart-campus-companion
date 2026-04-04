@@ -1,18 +1,18 @@
-/// Remote data source — handles all REST API communication.
-///
-/// This class will be implemented in Sprint 2 using the `dio` package.
-/// It will include:
-/// - Base URL configuration
-/// - Timeout settings (10s connect, 15s receive)
-/// - Request/response logging interceptor
-/// - Error mapping (network errors → domain exceptions)
-///
-/// Endpoints planned:
-/// - GET /announcements
-/// - GET /events
-/// - GET /timetable
-///
-/// For now this is a stub to preserve the folder structure.
+// Remote data source — handles all REST API communication.
+//
+// This class will be implemented in Sprint 2 using the `dio` package.
+// It will include:
+// - Base URL configuration
+// - Timeout settings (10s connect, 15s receive)
+// - Request/response logging interceptor
+// - Error mapping (network errors → domain exceptions)
+//
+// Endpoints planned:
+// - GET /announcements
+// - GET /events
+// - GET /timetable
+//
+// For now this is a stub to preserve the folder structure.
 
 // TODO: Sprint 2 — Implement with dio
 // class ApiClient {

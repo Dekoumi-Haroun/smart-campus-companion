@@ -1,7 +1,7 @@
-/// General-purpose helper functions used across the app.
-///
-/// Keep this file lean. If a helper becomes domain-specific,
-/// move it to the relevant feature folder.
+// General-purpose helper functions used across the app.
+//
+// Keep this file lean. If a helper becomes domain-specific,
+// move it to the relevant feature folder.
 
 /// Formats a [DateTime] into a human-readable string.
 /// Example: "Mar 15, 2025"
