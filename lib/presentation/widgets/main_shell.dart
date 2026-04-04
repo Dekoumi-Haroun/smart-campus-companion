@@ -52,42 +52,39 @@ class _MainShellState extends State<MainShell> {
       onWillPop: _onWillPop,
       child: Scaffold(
         // IndexedStack keeps all children alive but only shows the active one.
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
-        ),
+        body: IndexedStack(index: _currentIndex, children: _screens),
         bottomNavigationBar: Semantics(
           label: 'Main navigation',
           child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: _onTabTapped,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_rounded),
-              activeIcon: Icon(Icons.dashboard_rounded),
-              label: AppStrings.navHome,
-              tooltip: 'Home dashboard',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.campaign_outlined),
-              activeIcon: Icon(Icons.campaign_rounded),
-              label: AppStrings.navAnnouncements,
-              tooltip: 'Campus announcements',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.event_outlined),
-              activeIcon: Icon(Icons.event_rounded),
-              label: AppStrings.navEvents,
-              tooltip: 'Campus events',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              activeIcon: Icon(Icons.settings_rounded),
-              label: AppStrings.navSettings,
-              tooltip: 'App settings',
-            ),
-          ],
-        ),
+            currentIndex: _currentIndex,
+            onTap: _onTabTapped,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_rounded),
+                activeIcon: Icon(Icons.dashboard_rounded),
+                label: AppStrings.navHome,
+                tooltip: 'Home dashboard',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.campaign_outlined),
+                activeIcon: Icon(Icons.campaign_rounded),
+                label: AppStrings.navAnnouncements,
+                tooltip: 'Campus announcements',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.event_outlined),
+                activeIcon: Icon(Icons.event_rounded),
+                label: AppStrings.navEvents,
+                tooltip: 'Campus events',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings_outlined),
+                activeIcon: Icon(Icons.settings_rounded),
+                label: AppStrings.navSettings,
+                tooltip: 'App settings',
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -116,7 +116,8 @@ class _EventCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
-      label: 'Event: ${data.title}, ${data.date}, ${data.time}, at ${data.location}',
+      label:
+          'Event: ${data.title}, ${data.date}, ${data.time}, at ${data.location}',
       button: true,
       child: Card(
         child: InkWell(
@@ -134,7 +135,7 @@ class _EventCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: data.color.withOpacity(0.12),
+                    color: data.color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -176,7 +177,7 @@ class _EventCard extends StatelessWidget {
                 // Chevron
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: theme.colorScheme.onSurface.withOpacity(0.3),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                   semanticLabel: 'View details',
                 ),
               ],
@@ -193,11 +194,7 @@ class _InfoRow extends StatelessWidget {
   final String text;
   final String? semanticLabel;
 
-  const _InfoRow({
-    required this.icon,
-    required this.text,
-    this.semanticLabel,
-  });
+  const _InfoRow({required this.icon, required this.text, this.semanticLabel});
 
   @override
   Widget build(BuildContext context) {
@@ -208,15 +205,19 @@ class _InfoRow extends StatelessWidget {
           Icon(
             icon,
             size: 14,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.45),
           ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ),
         ],

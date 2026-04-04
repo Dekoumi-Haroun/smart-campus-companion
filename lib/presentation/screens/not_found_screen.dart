@@ -20,7 +20,7 @@ class NotFoundScreen extends StatelessWidget {
               Icon(
                 Icons.explore_off_rounded,
                 size: 80,
-                color: theme.colorScheme.onSurface.withOpacity(0.3),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 semanticLabel: 'Page not found',
               ),
               const SizedBox(height: 24),
@@ -43,7 +43,7 @@ class NotFoundScreen extends StatelessWidget {
                 AppStrings.pageNotFoundMessage,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 32),

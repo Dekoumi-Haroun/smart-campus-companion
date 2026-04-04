@@ -36,17 +36,17 @@ class ThemeCubit extends ValueNotifier<ThemeMode> {
 
   /// Human-readable label for the current mode.
   String get label => switch (value) {
-        ThemeMode.light => 'Light',
-        ThemeMode.dark => 'Dark',
-        ThemeMode.system => 'System',
-      };
+    ThemeMode.light => 'Light',
+    ThemeMode.dark => 'Dark',
+    ThemeMode.system => 'System',
+  };
 
   /// Convenience accessor to get the [ThemeCubit] from the widget tree.
   ///
   /// Requires that an [InheritedThemeCubit] ancestor exists.
   static ThemeCubit of(BuildContext context) {
-    final inherited =
-        context.dependOnInheritedWidgetOfExactType<InheritedThemeCubit>();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<InheritedThemeCubit>();
     assert(inherited != null, 'No InheritedThemeCubit found in context');
     return inherited!.cubit;
   }

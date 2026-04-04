@@ -1,14 +1,24 @@
-/// General-purpose helper functions used across the app.
-///
-/// Keep this file lean. If a helper becomes domain-specific,
-/// move it to the relevant feature folder.
+// General-purpose helper functions used across the app.
+//
+// Keep this file lean. If a helper becomes domain-specific,
+// move it to the relevant feature folder.
 
 /// Formats a [DateTime] into a human-readable string.
 /// Example: "Mar 15, 2025"
 String formatDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   return '${months[date.month - 1]} ${date.day}, ${date.year}';
 }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../blocs/theme/theme_cubit.dart';
@@ -18,9 +17,7 @@ class SettingsScreen extends StatelessWidget {
     final themeCubit = ThemeCubit.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.settingsTitle),
-      ),
+      appBar: AppBar(title: const Text(AppStrings.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
@@ -32,7 +29,10 @@ class SettingsScreen extends StatelessWidget {
             valueListenable: themeCubit,
             builder: (context, themeMode, _) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -117,10 +117,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.language_rounded),
             title: const Text(AppStrings.language),
-            subtitle: Text(
-              'English',
-              style: theme.textTheme.bodySmall,
-            ),
+            subtitle: Text('English', style: theme.textTheme.bodySmall),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () {
               // TODO: Language picker in an optional extension
@@ -173,10 +170,10 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.2,
-            ),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
+        ),
       ),
     );
   }

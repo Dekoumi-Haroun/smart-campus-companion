@@ -52,6 +52,7 @@ class AppStrings {
 
   // ── 404 ──
   static const String pageNotFound = 'Page Not Found';
-  static const String pageNotFoundMessage = 'The page you\'re looking for doesn\'t exist.';
+  static const String pageNotFoundMessage =
+      'The page you\'re looking for doesn\'t exist.';
   static const String goHome = 'Go Home';
 }
