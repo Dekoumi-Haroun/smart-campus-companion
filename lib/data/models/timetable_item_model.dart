@@ -4,8 +4,6 @@ import '../../domain/entities/timetable_item.dart';
 ///
 /// Handles JSON serialization/deserialization. Used for both
 /// API communication and local database storage.
-///
-/// Will be fully wired to the API response in Sprint 2.
 class TimetableItemModel {
   final String id;
   final String courseName;
@@ -14,6 +12,7 @@ class TimetableItemModel {
   final int dayOfWeek;
   final String startTime;
   final String endTime;
+  final String status;
 
   const TimetableItemModel({
     required this.id,
@@ -23,6 +22,7 @@ class TimetableItemModel {
     required this.dayOfWeek,
     required this.startTime,
     required this.endTime,
+    this.status = 'Upcoming',
   });
 
   /// Parse from JSON map (API response).
@@ -35,6 +35,7 @@ class TimetableItemModel {
       dayOfWeek: json['dayOfWeek'] ?? 1,
       startTime: json['startTime'] ?? '',
       endTime: json['endTime'] ?? '',
+      status: json['status'] ?? 'Upcoming',
     );
   }
 
@@ -48,6 +49,7 @@ class TimetableItemModel {
       'dayOfWeek': dayOfWeek,
       'startTime': startTime,
       'endTime': endTime,
+      'status': status,
     };
   }
 
@@ -61,6 +63,7 @@ class TimetableItemModel {
       dayOfWeek: dayOfWeek,
       startTime: startTime,
       endTime: endTime,
+      status: status,
     );
   }
 
@@ -74,6 +77,7 @@ class TimetableItemModel {
       dayOfWeek: entity.dayOfWeek,
       startTime: entity.startTime,
       endTime: entity.endTime,
+      status: entity.status,
     );
   }
 }

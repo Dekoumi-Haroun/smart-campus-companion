@@ -4,8 +4,6 @@ import '../../domain/entities/event.dart';
 ///
 /// Handles JSON serialization/deserialization between API responses,
 /// local database, and the pure domain [Event] entity.
-///
-/// Will be fully wired to the API response in Sprint 2.
 class EventModel {
   final String id;
   final String title;
@@ -13,6 +11,10 @@ class EventModel {
   final String location;
   final DateTime dateTime;
   final String? imageUrl;
+  final DateTime? endTime;
+  final String category;
+  final int attendeeCount;
+  final bool isReminded;
 
   const EventModel({
     required this.id,
@@ -21,6 +23,10 @@ class EventModel {
     required this.location,
     required this.dateTime,
     this.imageUrl,
+    this.endTime,
+    this.category = '',
+    this.attendeeCount = 0,
+    this.isReminded = false,
   });
 
   /// Parse from JSON map (API response).
@@ -32,6 +38,12 @@ class EventModel {
       location: json['location'] ?? '',
       dateTime: DateTime.tryParse(json['dateTime'] ?? '') ?? DateTime.now(),
       imageUrl: json['imageUrl'],
+      endTime: json['endTime'] != null
+          ? DateTime.tryParse(json['endTime'])
+          : null,
+      category: json['category'] ?? '',
+      attendeeCount: json['attendeeCount'] ?? 0,
+      isReminded: json['isReminded'] ?? false,
     );
   }
 
@@ -44,6 +56,10 @@ class EventModel {
       'location': location,
       'dateTime': dateTime.toIso8601String(),
       'imageUrl': imageUrl,
+      'endTime': endTime?.toIso8601String(),
+      'category': category,
+      'attendeeCount': attendeeCount,
+      'isReminded': isReminded,
     };
   }
 
@@ -56,6 +72,10 @@ class EventModel {
       location: location,
       dateTime: dateTime,
       imageUrl: imageUrl,
+      endTime: endTime,
+      category: category,
+      attendeeCount: attendeeCount,
+      isReminded: isReminded,
     );
   }
 
@@ -68,6 +88,10 @@ class EventModel {
       location: entity.location,
       dateTime: entity.dateTime,
       imageUrl: entity.imageUrl,
+      endTime: entity.endTime,
+      category: entity.category,
+      attendeeCount: entity.attendeeCount,
+      isReminded: entity.isReminded,
     );
   }
 }
