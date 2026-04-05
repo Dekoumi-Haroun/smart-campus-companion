@@ -1,32 +1,29 @@
 import 'package:dio/dio.dart';
 
 import '../../core/errors/app_exceptions.dart';
-import '../../domain/entities/announcement.dart';
-import '../../domain/repositories/announcement_repository.dart';
+import '../../domain/entities/event.dart';
+import '../../domain/repositories/event_repository.dart';
 import '../datasources/remote/api_client.dart';
-import '../models/announcement_model.dart';
+import '../models/event_model.dart';
 
-/// Concrete implementation of [AnnouncementRepository].
+/// Concrete implementation of [EventRepository].
 ///
-/// Fetches announcements from the remote API via [ApiClient], converts
-/// JSON responses into domain entities, and wraps Dio errors in
-/// domain-level [AppException]s.
+/// Fetches events from the remote API via [ApiClient], converts JSON
+/// responses into domain entities, and wraps Dio errors in domain-level
+/// [AppException]s.
 ///
 /// Local caching (offline-first fallback) will be added in Sprint 3.
-class AnnouncementRepositoryImpl implements AnnouncementRepository {
+class EventRepositoryImpl implements EventRepository {
   final ApiClient _apiClient;
 
-  AnnouncementRepositoryImpl({required ApiClient apiClient})
-    : _apiClient = apiClient;
+  EventRepositoryImpl({required ApiClient apiClient}) : _apiClient = apiClient;
 
   @override
-  Future<List<Announcement>> getAnnouncements() async {
+  Future<List<Event>> getEvents() async {
     try {
-      final jsonList = await _apiClient.getList('/announcements');
+      final jsonList = await _apiClient.getList('/events');
       return jsonList
-          .map(
-            (json) => AnnouncementModel.fromJson(json as Map<String, dynamic>),
-          )
+          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
           .map((model) => model.toEntity())
           .toList();
     } on DioException catch (e) {
@@ -35,13 +32,11 @@ class AnnouncementRepositoryImpl implements AnnouncementRepository {
   }
 
   @override
-  Future<Announcement?> getAnnouncementById(String id) async {
+  Future<Event?> getEventById(String id) async {
     try {
-      final jsonList = await _apiClient.getList('/announcements');
+      final jsonList = await _apiClient.getList('/events');
       final match = jsonList
-          .map(
-            (json) => AnnouncementModel.fromJson(json as Map<String, dynamic>),
-          )
+          .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
           .where((model) => model.id == id)
           .toList();
       return match.isEmpty ? null : match.first.toEntity();
