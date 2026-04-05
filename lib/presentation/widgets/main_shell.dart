@@ -14,10 +14,17 @@ class MainShell extends StatefulWidget {
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  State<MainShell> createState() => MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class MainShellState extends State<MainShell> {
+  /// Allows child widgets to switch tabs programmatically.
+  void switchTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
   int _currentIndex = 0;
 
   // The four tab screens — order matches the BottomNavigationBar items.
