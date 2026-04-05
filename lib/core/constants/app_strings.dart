@@ -21,14 +21,59 @@ class AppStrings {
   static const String recentAnnouncements = 'Recent Announcements';
   static const String upcomingEvents = 'Upcoming Events';
   static const String seeAll = 'See All';
+  static const String goodMorning = 'Good Morning';
+  static const String goodAfternoon = 'Good Afternoon';
+  static const String goodEvening = 'Good Evening';
+  static const String live = 'Live';
+  static const String now = 'NOW';
+  static const String currentClass = 'Current Class';
+  static const String noClassNow = 'No class right now';
+  static const String classesCompleted = 'classes today';
+  static const String announcements = 'ANNOUNCEMENTS';
+  static const String eventsToday = 'Events Today';
+  static const String alerts = 'Alerts';
+  static const String exportSchedule = 'Export Schedule';
+  static const String campusSafety = 'Campus Safety';
+  static const String campusSafetyComingSoon = 'Coming in Sprint 4';
+  static const String todaysSchedule = "Today's Schedule";
+  static const String announcementDetail = 'Announcement';
+  static const String eventDetail = 'Event Details';
+  static const String share = 'Share';
+  static const String save = 'Save';
+  static const String remind = 'Remind';
+  static const String setReminder = 'Set Reminder';
+  static const String reminderSet = 'Reminder Set';
+  static const String viewProfile = 'View Profile';
+  static const String signOut = 'Sign Out';
+  static const String userName = 'Maxframe';
+  static const String userEmail = 'maxframe@smartcampus.dev';
+  static const String scheduleExported = 'Schedule exported successfully!';
 
   // ── Announcements Screen ──
   static const String announcementsTitle = 'Announcements';
   static const String noAnnouncements = 'No announcements yet';
+  static const String searchAnnouncements = 'Search announcements...';
+  static const String noResults = 'No results found';
+  static const String noResultsMessage =
+      'Try a different search term or filter.';
+  static const String filterAll = 'All';
+  static const String filterAcademic = 'Academic';
+  static const String filterSports = 'Sports';
+  static const String filterGeneral = 'General';
+  static const String filterUrgent = 'Urgent';
+  static const String minRead = 'min read';
 
   // ── Events Screen ──
   static const String eventsTitle = 'Events';
   static const String noEvents = 'No upcoming events';
+  static const String searchEvents = 'Search events...';
+  static const String going = 'going';
+  static const String reminded = 'Reminded';
+  static const String attachPhoto = 'Attach Photo';
+  static const String attachPhotoComingSoon =
+      'Camera integration coming in Sprint 4';
+  static const String reminderSetFor = 'Reminder set for';
+  static const String reminderRemovedFor = 'Reminder removed for';
 
   // ── Settings Screen ──
   static const String settingsTitle = 'Settings';
