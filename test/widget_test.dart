@@ -1,9 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_campus/app.dart';
 import 'package:smart_campus/data/repositories/settings_repository.dart';
 
 void main() {
   testWidgets('App renders home screen', (WidgetTester tester) async {
+    // Provide empty in-memory SharedPreferences for the test environment.
+    SharedPreferences.setMockInitialValues({});
+
     final settingsRepo = SettingsRepository();
     await settingsRepo.init();
 
