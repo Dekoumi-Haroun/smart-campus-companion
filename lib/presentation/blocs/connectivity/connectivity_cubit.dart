@@ -10,8 +10,8 @@ class ConnectivityCubit extends Cubit<ConnectivityState> {
   late final StreamSubscription<List<ConnectivityResult>> _subscription;
 
   ConnectivityCubit({Connectivity? connectivity})
-      : _connectivity = connectivity ?? Connectivity(),
-        super(const ConnectivityOnline()) {
+    : _connectivity = connectivity ?? Connectivity(),
+      super(const ConnectivityOnline()) {
     _subscription = _connectivity.onConnectivityChanged.listen(_onChanged);
     _checkInitial();
   }

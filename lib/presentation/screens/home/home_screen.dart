@@ -112,9 +112,7 @@ class _Header extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              isOffline
-                                  ? AppStrings.offline
-                                  : AppStrings.live,
+                              isOffline ? AppStrings.offline : AppStrings.live,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,
