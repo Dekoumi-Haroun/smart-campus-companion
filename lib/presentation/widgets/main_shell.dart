@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_strings.dart';
-import '../screens/home/home_screen.dart';
+import '../../core/widgets/common_widgets.dart';
 import '../screens/announcements/announcements_screen.dart';
 import '../screens/events/events_screen.dart';
+import '../screens/home/home_screen.dart';
 import '../screens/settings/settings_screen.dart';
 
 /// The main shell widget that hosts the [BottomNavigationBar] and
@@ -58,8 +60,14 @@ class MainShellState extends State<MainShell> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        // IndexedStack keeps all children alive but only shows the active one.
-        body: IndexedStack(index: _currentIndex, children: _screens),
+        body: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(
+              child: IndexedStack(index: _currentIndex, children: _screens),
+            ),
+          ],
+        ),
         bottomNavigationBar: Semantics(
           label: 'Main navigation',
           child: BottomNavigationBar(

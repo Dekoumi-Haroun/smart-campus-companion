@@ -92,7 +92,9 @@ class AppStrings {
   static const String loading = 'Loading...';
   static const String retry = 'Retry';
   static const String errorGeneric = 'Something went wrong';
-  static const String offlineBanner = 'You are offline';
+  static const String offlineBanner =
+      "You're browsing offline - Cached content";
+  static const String offline = 'Offline';
   static const String comingSoon = 'Coming Soon';
 
   // ── 404 ──
