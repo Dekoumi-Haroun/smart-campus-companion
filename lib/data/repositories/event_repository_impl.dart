@@ -3,31 +3,37 @@ import 'package:dio/dio.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../domain/entities/event.dart';
 import '../../domain/repositories/event_repository.dart';
+import '../datasources/local/event_local_dao.dart';
 import '../datasources/remote/api_client.dart';
 import '../models/event_model.dart';
 
 /// Concrete implementation of [EventRepository].
 ///
-/// Fetches events from the remote API via [ApiClient], converts JSON
-/// responses into domain entities, and wraps Dio errors in domain-level
-/// [AppException]s.
-///
-/// Local caching (offline-first fallback) will be added in Sprint 3.
+/// Applies an offline-first strategy: fetch from remote, cache locally,
+/// and fall back to cached data when the network is unavailable.
 class EventRepositoryImpl implements EventRepository {
   final ApiClient _apiClient;
+  final EventLocalDao _localDao;
 
-  EventRepositoryImpl({required ApiClient apiClient}) : _apiClient = apiClient;
+  EventRepositoryImpl({
+    required ApiClient apiClient,
+    required EventLocalDao localDao,
+  }) : _apiClient = apiClient,
+       _localDao = localDao;
 
   @override
   Future<List<Event>> getEvents() async {
     try {
       final jsonList = await _apiClient.getList('/events');
-      return jsonList
+      final models = jsonList
           .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
-          .map((model) => model.toEntity())
           .toList();
-    } on DioException catch (e) {
-      throw _mapDioException(e);
+      await _localDao.insertAll(models);
+      return models.map((m) => m.toEntity()).toList();
+    } on DioException {
+      final cached = await _localDao.getAll();
+      if (cached.isNotEmpty) return cached.map((m) => m.toEntity()).toList();
+      throw const CacheException();
     }
   }
 
@@ -35,26 +41,16 @@ class EventRepositoryImpl implements EventRepository {
   Future<Event?> getEventById(String id) async {
     try {
       final jsonList = await _apiClient.getList('/events');
-      final match = jsonList
+      final models = jsonList
           .map((json) => EventModel.fromJson(json as Map<String, dynamic>))
-          .where((model) => model.id == id)
           .toList();
+      await _localDao.insertAll(models);
+      final match = models.where((m) => m.id == id).toList();
       return match.isEmpty ? null : match.first.toEntity();
-    } on DioException catch (e) {
-      throw _mapDioException(e);
+    } on DioException {
+      final cached = await _localDao.getAll();
+      final match = cached.where((m) => m.id == id).toList();
+      return match.isEmpty ? null : match.first.toEntity();
     }
-  }
-
-  AppException _mapDioException(DioException e) {
-    if (e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.sendTimeout ||
-        e.type == DioExceptionType.receiveTimeout) {
-      return const NetworkException();
-    }
-    return ServerException(
-      e.message ?? 'Something went wrong on our end. Please try again later.',
-      e.response?.statusCode,
-    );
   }
 }

@@ -5,34 +5,39 @@ import 'package:dio/dio.dart';
 import '../../core/errors/app_exceptions.dart';
 import '../../domain/entities/timetable_item.dart';
 import '../../domain/repositories/timetable_repository.dart';
+import '../datasources/local/timetable_local_dao.dart';
 import '../datasources/remote/api_client.dart';
 import '../models/timetable_item_model.dart';
 
 /// Concrete implementation of [TimetableRepository].
 ///
-/// Fetches the weekly timetable from the remote API via [ApiClient],
-/// converts JSON responses into domain entities, and wraps Dio errors
-/// in domain-level [AppException]s.
-///
-/// Local caching (offline-first fallback) will be added in Sprint 3.
+/// Applies an offline-first strategy: fetch from remote, cache locally,
+/// and fall back to cached data when the network is unavailable.
 class TimetableRepositoryImpl implements TimetableRepository {
   final ApiClient _apiClient;
+  final TimetableLocalDao _localDao;
 
-  TimetableRepositoryImpl({required ApiClient apiClient})
-    : _apiClient = apiClient;
+  TimetableRepositoryImpl({
+    required ApiClient apiClient,
+    required TimetableLocalDao localDao,
+  }) : _apiClient = apiClient,
+       _localDao = localDao;
 
   @override
   Future<List<TimetableItem>> getTimetable() async {
     try {
       final jsonList = await _apiClient.getList('/timetable');
-      return jsonList
+      final models = jsonList
           .map(
             (json) => TimetableItemModel.fromJson(json as Map<String, dynamic>),
           )
-          .map((model) => model.toEntity())
           .toList();
-    } on DioException catch (e) {
-      throw _mapDioException(e);
+      await _localDao.insertAll(models);
+      return models.map((m) => m.toEntity()).toList();
+    } on DioException {
+      final cached = await _localDao.getAll();
+      if (cached.isNotEmpty) return cached.map((m) => m.toEntity()).toList();
+      throw const CacheException();
     }
   }
 
@@ -51,22 +56,14 @@ class TimetableRepositoryImpl implements TimetableRepository {
             (json) => TimetableItemModel.fromJson(json as Map<String, dynamic>),
           )
           .toList();
+      await _localDao.insertAll(models);
       return json.encode(models.map((m) => m.toJson()).toList());
-    } on DioException catch (e) {
-      throw _mapDioException(e);
+    } on DioException {
+      final cached = await _localDao.getAll();
+      if (cached.isNotEmpty) {
+        return json.encode(cached.map((m) => m.toJson()).toList());
+      }
+      throw const CacheException();
     }
-  }
-
-  AppException _mapDioException(DioException e) {
-    if (e.type == DioExceptionType.connectionTimeout ||
-        e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.sendTimeout ||
-        e.type == DioExceptionType.receiveTimeout) {
-      return const NetworkException();
-    }
-    return ServerException(
-      e.message ?? 'Something went wrong on our end. Please try again later.',
-      e.response?.statusCode,
-    );
   }
 }

@@ -1,27 +1,69 @@
-// Local data source — handles all on-device persistence.
-//
-// This class will be implemented in Sprint 3 and will manage:
-// - SQLite / Hive database for structured content caching
-// - SharedPreferences for user settings
-// - FlutterSecureStorage for auth tokens
-// - File I/O for schedule export
-//
-// The local data source is the backbone of offline-first:
-// when the remote source fails, the repository falls back to cached data here.
-//
-// For now this is a stub to preserve the folder structure.
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
-// TODO: Sprint 3 — Implement with sqflite or hive
-// class LocalDatabase {
-//   static Database? _database;
-//
-//   Future<Database> get database async {
-//     _database ??= await _initDatabase();
-//     return _database!;
-//   }
-//
-//   Future<Database> _initDatabase() async {
-//     final path = join(await getDatabasesPath(), 'smart_campus.db');
-//     return openDatabase(path, version: 1, onCreate: _onCreate);
-//   }
-// }
+/// Singleton that manages the on-device SQLite database.
+///
+/// Provides a single [database] getter that lazily initialises the DB
+/// and creates the three cache tables on first run.
+class LocalDatabase {
+  LocalDatabase._();
+
+  static final LocalDatabase instance = LocalDatabase._();
+
+  Database? _database;
+
+  /// Returns the opened database, creating it on first access.
+  Future<Database> get database async {
+    _database ??= await _initDatabase();
+    return _database!;
+  }
+
+  Future<Database> _initDatabase() async {
+    final dbPath = join(await getDatabasesPath(), 'smart_campus.db');
+    return openDatabase(dbPath, version: 1, onCreate: _onCreate);
+  }
+
+  Future<void> _onCreate(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE announcements (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        body TEXT,
+        category TEXT,
+        summary TEXT,
+        source TEXT,
+        date TEXT,
+        readTime INTEGER,
+        isBookmarked INTEGER
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE events (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        description TEXT,
+        location TEXT,
+        dateTime TEXT,
+        imageUrl TEXT,
+        endTime TEXT,
+        category TEXT,
+        attendeeCount INTEGER,
+        isReminded INTEGER
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE timetable_items (
+        id TEXT PRIMARY KEY,
+        courseName TEXT,
+        instructor TEXT,
+        room TEXT,
+        dayOfWeek INTEGER,
+        startTime TEXT,
+        endTime TEXT,
+        status TEXT
+      )
+    ''');
+  }
+}

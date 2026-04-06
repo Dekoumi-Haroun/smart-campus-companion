@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/repositories/settings_repository.dart';
+
 /// Manages the app's theme mode (light / dark / system) using [ValueNotifier].
 ///
-/// We use [ValueNotifier] in Sprint 1 to avoid adding BLoC as a dependency
-/// before it's needed. This will be upgraded to a full Cubit in Sprint 2
-/// when we add flutter_bloc for data state management.
-///
-/// The [ThemeCubit] is placed at the top of the widget tree (in [App])
-/// and accessed by descendants via [ThemeCubit.of(context)].
+/// Persists the selected theme to [SharedPreferences] via [SettingsRepository].
 class ThemeCubit extends ValueNotifier<ThemeMode> {
-  ThemeCubit() : super(ThemeMode.system);
+  final SettingsRepository _settingsRepository;
 
-  /// Set a specific theme mode.
+  ThemeCubit(this._settingsRepository)
+    : super(_settingsRepository.getThemeMode());
+
+  /// Set a specific theme mode and persist it.
   void setTheme(ThemeMode mode) {
     value = mode;
+    _settingsRepository.setThemeMode(mode);
   }
 
   /// Cycle through: system → light → dark → system …
   void cycleTheme() {
     switch (value) {
       case ThemeMode.system:
-        value = ThemeMode.light;
+        setTheme(ThemeMode.light);
       case ThemeMode.light:
-        value = ThemeMode.dark;
+        setTheme(ThemeMode.dark);
       case ThemeMode.dark:
-        value = ThemeMode.system;
+        setTheme(ThemeMode.system);
     }
   }
 

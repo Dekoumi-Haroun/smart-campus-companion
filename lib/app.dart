@@ -5,9 +5,14 @@ import 'core/constants/app_strings.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router.dart';
+import 'data/datasources/local/announcement_local_dao.dart';
+import 'data/datasources/local/event_local_dao.dart';
+import 'data/datasources/local/local_database.dart';
+import 'data/datasources/local/timetable_local_dao.dart';
 import 'data/datasources/remote/api_client.dart';
 import 'data/repositories/announcement_repository_impl.dart';
 import 'data/repositories/event_repository_impl.dart';
+import 'data/repositories/settings_repository.dart';
 import 'data/repositories/timetable_repository_impl.dart';
 import 'presentation/blocs/announcement/announcement_bloc.dart';
 import 'presentation/blocs/announcement/announcement_event.dart';
@@ -25,14 +30,16 @@ import 'presentation/blocs/theme/theme_cubit.dart';
 /// 2. Provide data BLoCs (Announcement, Event, Timetable) via [MultiBlocProvider].
 /// 3. Configure [MaterialApp] with theming, routing, and accessibility.
 class App extends StatefulWidget {
-  const App({super.key});
+  final SettingsRepository settingsRepository;
+
+  const App({super.key, required this.settingsRepository});
 
   @override
   State<App> createState() => _AppState();
 }
 
 class _AppState extends State<App> {
-  final _themeCubit = ThemeCubit();
+  late final ThemeCubit _themeCubit;
   final _connectivityCubit = ConnectivityCubit();
   late final ApiClient _apiClient;
   late final AnnouncementBloc _announcementBloc;
@@ -42,18 +49,33 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+    _themeCubit = ThemeCubit(widget.settingsRepository);
     _apiClient = ApiClient();
 
+    final localDb = LocalDatabase.instance;
+    final announcementDao = AnnouncementLocalDao(localDb);
+    final eventDao = EventLocalDao(localDb);
+    final timetableDao = TimetableLocalDao(localDb);
+
     _announcementBloc = AnnouncementBloc(
-      repository: AnnouncementRepositoryImpl(apiClient: _apiClient),
+      repository: AnnouncementRepositoryImpl(
+        apiClient: _apiClient,
+        localDao: announcementDao,
+      ),
     )..add(const FetchAnnouncements());
 
     _eventBloc = EventBloc(
-      repository: EventRepositoryImpl(apiClient: _apiClient),
+      repository: EventRepositoryImpl(
+        apiClient: _apiClient,
+        localDao: eventDao,
+      ),
     )..add(const FetchEvents());
 
     _timetableBloc = TimetableBloc(
-      repository: TimetableRepositoryImpl(apiClient: _apiClient),
+      repository: TimetableRepositoryImpl(
+        apiClient: _apiClient,
+        localDao: timetableDao,
+      ),
     )..add(const FetchTimetable());
   }
 
@@ -76,26 +98,29 @@ class _AppState extends State<App> {
         BlocProvider.value(value: _eventBloc),
         BlocProvider.value(value: _timetableBloc),
       ],
-      child: InheritedThemeCubit(
-        cubit: _themeCubit,
-        child: ValueListenableBuilder<ThemeMode>(
-          valueListenable: _themeCubit,
-          builder: (context, themeMode, _) {
-            return MaterialApp(
-              // ── Identity ──
-              title: AppStrings.appName,
-              debugShowCheckedModeBanner: false,
+      child: RepositoryProvider.value(
+        value: widget.settingsRepository,
+        child: InheritedThemeCubit(
+          cubit: _themeCubit,
+          child: ValueListenableBuilder<ThemeMode>(
+            valueListenable: _themeCubit,
+            builder: (context, themeMode, _) {
+              return MaterialApp(
+                // ── Identity ──
+                title: AppStrings.appName,
+                debugShowCheckedModeBanner: false,
 
-              // ── Theming ──
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: themeMode,
+                // ── Theming ──
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: themeMode,
 
-              // ── Routing ──
-              initialRoute: AppRoutes.home,
-              onGenerateRoute: AppRouter.generateRoute,
-            );
-          },
+                // ── Routing ──
+                initialRoute: AppRoutes.home,
+                onGenerateRoute: AppRouter.generateRoute,
+              );
+            },
+          ),
         ),
       ),
     );
