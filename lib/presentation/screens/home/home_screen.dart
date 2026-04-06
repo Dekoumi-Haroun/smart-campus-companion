@@ -9,6 +9,8 @@ import '../../../domain/entities/event.dart';
 import '../../../domain/entities/timetable_item.dart';
 import '../../blocs/announcement/announcement_bloc.dart';
 import '../../blocs/announcement/announcement_state.dart';
+import '../../blocs/connectivity/connectivity_cubit.dart';
+import '../../blocs/connectivity/connectivity_state.dart';
 import '../../blocs/event/event_bloc.dart';
 import '../../blocs/event/event_event.dart';
 import '../../blocs/event/event_state.dart';
@@ -83,37 +85,44 @@ class _Header extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
+                  BlocBuilder<ConnectivityCubit, ConnectivityState>(
+                    builder: (context, connState) {
+                      final isOffline = connState is ConnectivityOffline;
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
                         ),
-                        const SizedBox(width: 4),
-                        const Text(
-                          AppStrings.live,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        decoration: BoxDecoration(
+                          color: isOffline
+                              ? AppColors.warning
+                              : AppColors.success,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              isOffline ? AppStrings.offline : AppStrings.live,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -216,61 +225,68 @@ class _CurrentClassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TimetableBloc, TimetableState>(
-      builder: (context, state) {
-        if (state is TimetableLoading) {
-          return _buildCardShell(
-            context,
-            child: const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
-            ),
-          );
-        }
-        if (state is TimetableError) {
-          return _buildCardShell(
-            context,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                state.message,
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ),
-          );
-        }
-        if (state is TimetableLoaded) {
-          final today = DateTime.now().weekday;
-          final todayClasses =
-              state.items.where((i) => i.dayOfWeek == today).toList()
-                ..sort((a, b) => a.startTime.compareTo(b.startTime));
+    return BlocBuilder<ConnectivityCubit, ConnectivityState>(
+      builder: (context, connState) {
+        final isOffline = connState is ConnectivityOffline;
 
-          final currentOrNext = _findCurrentOrNext(todayClasses);
-          final completed = todayClasses
-              .where((c) => c.status == 'Completed')
-              .length;
+        return BlocBuilder<TimetableBloc, TimetableState>(
+          builder: (context, state) {
+            if (state is TimetableLoading) {
+              return _buildCardShell(
+                context,
+                child: const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24),
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
+              );
+            }
+            if (state is TimetableError) {
+              return _buildCardShell(
+                context,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(
+                    state.message,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
+                ),
+              );
+            }
+            if (state is TimetableLoaded) {
+              final today = DateTime.now().weekday;
+              final todayClasses =
+                  state.items.where((i) => i.dayOfWeek == today).toList()
+                    ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
-          return GestureDetector(
-            onTap: () => _showTodayScheduleSheet(context, todayClasses),
-            child: _buildCardShell(
-              context,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: currentOrNext != null
-                    ? _buildClassInfo(
-                        context,
-                        currentOrNext,
-                        completed,
-                        todayClasses.length,
-                      )
-                    : _buildNoClass(context),
-              ),
-            ),
-          );
-        }
-        return const SizedBox.shrink();
+              final currentOrNext = _findCurrentOrNext(todayClasses);
+              final completed = todayClasses
+                  .where((c) => c.status == 'Completed')
+                  .length;
+
+              return GestureDetector(
+                onTap: () => _showTodayScheduleSheet(context, todayClasses),
+                child: _buildCardShell(
+                  context,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: currentOrNext != null
+                        ? _buildClassInfo(
+                            context,
+                            currentOrNext,
+                            completed,
+                            todayClasses.length,
+                            isOffline: isOffline,
+                          )
+                        : _buildNoClass(context),
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        );
       },
     );
   }
@@ -300,8 +316,9 @@ class _CurrentClassCard extends StatelessWidget {
     BuildContext context,
     TimetableItem item,
     int completed,
-    int total,
-  ) {
+    int total, {
+    bool isOffline = false,
+  }) {
     final isNow = item.status == 'In Progress';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +359,7 @@ class _CurrentClassCard extends StatelessWidget {
               ),
             const Spacer(),
             Text(
-              '${item.startTime} - ${item.endTime}',
+              isOffline ? '--' : '${item.startTime} - ${item.endTime}',
               style: const TextStyle(color: Colors.white60, fontSize: 13),
             ),
           ],
@@ -388,8 +405,13 @@ class _CurrentClassCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '$completed of $total ${AppStrings.classesCompleted}',
-          style: const TextStyle(color: Colors.white54, fontSize: 12),
+          isOffline
+              ? 'Last synced: 5 min ago'
+              : '$completed of $total ${AppStrings.classesCompleted}',
+          style: TextStyle(
+            color: isOffline ? AppColors.warning : Colors.white54,
+            fontSize: 12,
+          ),
         ),
       ],
     );

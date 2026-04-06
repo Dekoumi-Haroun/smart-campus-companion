@@ -15,6 +15,7 @@ import 'presentation/blocs/event/event_bloc.dart';
 import 'presentation/blocs/event/event_event.dart';
 import 'presentation/blocs/timetable/timetable_bloc.dart';
 import 'presentation/blocs/timetable/timetable_event.dart';
+import 'presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'presentation/blocs/theme/theme_cubit.dart';
 
 /// Root widget of the SmartCampus app.
@@ -32,6 +33,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   final _themeCubit = ThemeCubit();
+  final _connectivityCubit = ConnectivityCubit();
   late final ApiClient _apiClient;
   late final AnnouncementBloc _announcementBloc;
   late final EventBloc _eventBloc;
@@ -57,6 +59,7 @@ class _AppState extends State<App> {
 
   @override
   void dispose() {
+    _connectivityCubit.close();
     _announcementBloc.close();
     _eventBloc.close();
     _timetableBloc.close();
@@ -68,6 +71,7 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider.value(value: _connectivityCubit),
         BlocProvider.value(value: _announcementBloc),
         BlocProvider.value(value: _eventBloc),
         BlocProvider.value(value: _timetableBloc),
