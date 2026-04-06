@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'app.dart';
+import 'data/repositories/settings_repository.dart';
 
 /// Application entry point.
 ///
-/// Keeps main() minimal — all configuration lives in [App].
-/// Future sprints will add initialization here for:
-/// - Notification service (Sprint 5)
-/// - Background task registration (Sprint 5)
-/// - Secure storage initialization (Sprint 3)
-void main() {
+/// Initializes [SettingsRepository] before running the app so that
+/// persisted preferences (theme, notifications, language) are available
+/// synchronously from the first frame.
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Lock orientation to portrait for consistent UX.
@@ -18,5 +18,8 @@ void main() {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(const App());
+  final settingsRepository = SettingsRepository();
+  await settingsRepository.init();
+
+  runApp(App(settingsRepository: settingsRepository));
 }

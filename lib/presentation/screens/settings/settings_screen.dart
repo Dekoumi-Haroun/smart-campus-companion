@@ -1,19 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../core/constants/app_strings.dart';
+import '../../../data/repositories/settings_repository.dart';
 import '../../blocs/theme/theme_cubit.dart';
 
 /// Settings screen.
 ///
 /// Groups: Appearance, Notifications, Language, Account, About.
-/// Theme toggle is functional from Sprint 1. Other settings become
-/// functional in later sprints (notifications in Sprint 5, auth in Sprint 6).
-class SettingsScreen extends StatelessWidget {
+/// Theme, notifications, and language are persisted via [SettingsRepository].
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late final SettingsRepository _settingsRepo;
+  late bool _notificationsEnabled;
+  late String _language;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _settingsRepo = RepositoryProvider.of<SettingsRepository>(context);
+    _notificationsEnabled = _settingsRepo.getNotificationsEnabled();
+    _language = _settingsRepo.getLanguage();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Access the ThemeCubit provided above in the widget tree
     final themeCubit = ThemeCubit.of(context);
 
     return Scaffold(
@@ -52,7 +70,6 @@ class SettingsScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // Segmented button for Light / Dark / System
                     SizedBox(
                       width: double.infinity,
                       child: SegmentedButton<ThemeMode>(
@@ -104,9 +121,12 @@ class SettingsScreen extends StatelessWidget {
               'Receive class reminders & alerts',
               style: theme.textTheme.bodySmall,
             ),
-            value: true, // Placeholder — will be wired in Sprint 5
+            value: _notificationsEnabled,
             onChanged: (value) {
-              // TODO: Persist to SharedPreferences in Sprint 3
+              setState(() {
+                _notificationsEnabled = value;
+              });
+              _settingsRepo.setNotificationsEnabled(value);
             },
           ),
 
@@ -117,11 +137,9 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.language_rounded),
             title: const Text(AppStrings.language),
-            subtitle: Text('English', style: theme.textTheme.bodySmall),
+            subtitle: Text(_language, style: theme.textTheme.bodySmall),
             trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () {
-              // TODO: Language picker in an optional extension
-            },
+            onTap: () => _showLanguagePicker(context),
           ),
 
           const Divider(),
@@ -154,6 +172,30 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    showDialog<String>(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text('Select Language'),
+          children: ['English', 'French', 'Arabic'].map((lang) {
+            return SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, lang),
+              child: Text(lang),
+            );
+          }).toList(),
+        );
+      },
+    ).then((selected) {
+      if (selected != null && selected != _language) {
+        setState(() {
+          _language = selected;
+        });
+        _settingsRepo.setLanguage(selected);
+      }
+    });
   }
 }
 

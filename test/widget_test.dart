@@ -1,9 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_campus/app.dart';
+import 'package:smart_campus/data/repositories/settings_repository.dart';
 
 void main() {
   testWidgets('App renders home screen', (WidgetTester tester) async {
-    await tester.pumpWidget(const App());
+    final settingsRepo = SettingsRepository();
+    await settingsRepo.init();
+
+    await tester.pumpWidget(App(settingsRepository: settingsRepo));
 
     // Advance past the MockInterceptor's 500ms simulated delay so
     // pending timers resolve before the test tears down.
