@@ -13,6 +13,8 @@ abstract class TimetableRepository {
   /// Fetch items for a specific day (1 = Monday ... 7 = Sunday).
   Future<List<TimetableItem>> getTimetableByDay(int dayOfWeek);
 
-  /// Export the timetable as a JSON string (for File I/O in Sprint 3).
+  /// Export the timetable to a JSON file in the app's documents directory.
+  ///
+  /// Returns the absolute file path of the exported file.
   Future<String> exportToJson();
 }

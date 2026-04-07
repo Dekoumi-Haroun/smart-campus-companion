@@ -10,7 +10,7 @@ void main() {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
 
-    // Provide empty in-memory SharedPreferences for the test environment.
+    // Provide empty in-memory SyesharedPreferences for the test environment.
     SharedPreferences.setMockInitialValues({});
 
     final settingsRepo = SettingsRepository();

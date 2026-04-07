@@ -51,12 +51,8 @@ class TimetableBloc extends Bloc<TimetableEvent, TimetableState> {
     // or a dedicated export state), but for now we re-emit the current loaded
     // state after exporting so the UI knows the operation completed.
     try {
-      await _repository.exportToJson();
-      // Re-emit current state unchanged; UI can show a success snackbar.
-      if (state is TimetableLoaded) {
-        final current = state as TimetableLoaded;
-        emit(TimetableLoaded(List.of(current.items)));
-      }
+      final filePath = await _repository.exportToJson();
+      emit(TimetableExported(filePath));
     } on AppException catch (e) {
       emit(TimetableError(e.message));
     }
