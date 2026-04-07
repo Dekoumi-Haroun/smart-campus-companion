@@ -9,6 +9,7 @@ import 'data/datasources/local/announcement_local_dao.dart';
 import 'data/datasources/local/event_local_dao.dart';
 import 'data/datasources/local/local_database.dart';
 import 'data/datasources/local/timetable_local_dao.dart';
+import 'data/datasources/local/secure_storage_service.dart';
 import 'data/datasources/remote/api_client.dart';
 import 'data/repositories/announcement_repository_impl.dart';
 import 'data/repositories/event_repository_impl.dart';
@@ -41,6 +42,7 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   late final ThemeCubit _themeCubit;
   final _connectivityCubit = ConnectivityCubit();
+  late final SecureStorageService _secureStorageService;
   late final ApiClient _apiClient;
   late final AnnouncementBloc _announcementBloc;
   late final EventBloc _eventBloc;
@@ -50,6 +52,7 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     _themeCubit = ThemeCubit(widget.settingsRepository);
+    _secureStorageService = SecureStorageService();
     _apiClient = ApiClient();
 
     final localDb = LocalDatabase.instance;
@@ -98,8 +101,11 @@ class _AppState extends State<App> {
         BlocProvider.value(value: _eventBloc),
         BlocProvider.value(value: _timetableBloc),
       ],
-      child: RepositoryProvider.value(
-        value: widget.settingsRepository,
+      child: MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider.value(value: widget.settingsRepository),
+          RepositoryProvider.value(value: _secureStorageService),
+        ],
         child: InheritedThemeCubit(
           cubit: _themeCubit,
           child: ValueListenableBuilder<ThemeMode>(
