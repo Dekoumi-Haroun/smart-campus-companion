@@ -88,6 +88,41 @@ class AppStrings {
   static const String about = 'About';
   static const String version = 'Version 1.0.0';
 
+  // ── Permissions ──
+  static const String permissionDeniedTitle = 'Permission Required';
+  static const String permissionDeniedGeneric =
+      'This feature requires a permission that was denied.';
+  static const String permissionPermanentlyDenied =
+      'Permission was permanently denied. Please enable it in your device settings.';
+  static const String openSettings = 'Open Settings';
+  static const String cameraPermissionReason =
+      'Camera access is needed to attach photos to events.';
+  static const String galleryPermissionReason =
+      'Photo library access is needed to choose existing photos.';
+  static const String locationPermissionReason =
+      'Location access is needed to show your position on the campus map.';
+  static const String bluetoothPermissionReason =
+      'Bluetooth access is needed to detect campus beacons.';
+
+  // ── Campus Map ──
+  static const String campusMapTitle = 'Campus Map';
+  static const String centerOnMe = 'Center on me';
+
+  // ── Device Features (Settings) ──
+  static const String deviceFeatures = 'Device Features';
+  static const String bluetooth = 'Bluetooth';
+  static const String bluetoothAvailable = 'Available';
+  static const String bluetoothUnavailable = 'Unavailable';
+  static const String nfc = 'NFC';
+  static const String nfcConceptual = 'Conceptual';
+  static const String bluetoothDescription =
+      'Bluetooth could be used for campus beacon-based attendance tracking, '
+      'indoor navigation, and proximity alerts near lecture halls.';
+  static const String nfcDescription =
+      'NFC could enable tap-to-check-in for classes, '
+      'library card scanning, and quick access to campus resources. '
+      'Requires android.nfc permission on Android.';
+
   // ── Common ──
   static const String loading = 'Loading...';
   static const String retry = 'Retry';
