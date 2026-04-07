@@ -26,6 +26,15 @@ class TimetableLoaded extends TimetableState {
   List<Object?> get props => [items];
 }
 
+class TimetableExported extends TimetableState {
+  final String filePath;
+
+  const TimetableExported(this.filePath);
+
+  @override
+  List<Object?> get props => [filePath];
+}
+
 class TimetableError extends TimetableState {
   final String message;
 

@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../core/errors/app_exceptions.dart';
 import '../../domain/entities/timetable_item.dart';
@@ -49,6 +51,7 @@ class TimetableRepositoryImpl implements TimetableRepository {
 
   @override
   Future<String> exportToJson() async {
+    String jsonString;
     try {
       final jsonList = await _apiClient.getList('/timetable');
       final models = jsonList
@@ -57,13 +60,20 @@ class TimetableRepositoryImpl implements TimetableRepository {
           )
           .toList();
       await _localDao.insertAll(models);
-      return json.encode(models.map((m) => m.toJson()).toList());
+      jsonString = json.encode(models.map((m) => m.toJson()).toList());
     } on DioException {
       final cached = await _localDao.getAll();
       if (cached.isNotEmpty) {
-        return json.encode(cached.map((m) => m.toJson()).toList());
+        jsonString = json.encode(cached.map((m) => m.toJson()).toList());
+      } else {
+        throw const CacheException();
       }
-      throw const CacheException();
     }
+
+    final directory = await getApplicationDocumentsDirectory();
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final file = File('${directory.path}/timetable_export_$timestamp.json');
+    await file.writeAsString(jsonString);
+    return file.path;
   }
 }
