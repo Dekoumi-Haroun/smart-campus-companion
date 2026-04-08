@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/services/bluetooth_service.dart';
+import '../../../core/services/permission_service.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../blocs/theme/theme_cubit.dart';
 
@@ -256,7 +257,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _showBluetoothDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Row(
             children: [
@@ -265,10 +266,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(AppStrings.bluetooth),
             ],
           ),
-          content: const Text(AppStrings.bluetoothDescription),
+          content: Text(
+            _bluetoothStatus == BluetoothStatus.permissionDenied
+                ? '${AppStrings.bluetoothDescription}\n\n${AppStrings.permissionPermanentlyDenied}'
+                : AppStrings.bluetoothDescription,
+          ),
           actions: [
+            if (_bluetoothStatus == BluetoothStatus.permissionDenied)
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  const PermissionService().openSettings();
+                },
+                child: const Text(AppStrings.openSettings),
+              ),
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('OK'),
             ),
           ],

@@ -15,33 +15,32 @@ class BluetoothService {
 
   /// Checks if Bluetooth permission is granted.
   ///
-  /// Returns a [BluetoothStatus] indicating availability, whether
-  /// permission was denied, or if it's permanently denied.
+  /// Never throws — platform errors return [BluetoothStatus.unavailable].
   Future<BluetoothStatus> checkStatus() async {
-    final status = await _permissionService.checkStatus(Permission.bluetooth);
-
-    if (status.isGranted) {
-      return BluetoothStatus.available;
+    try {
+      final status = await _permissionService.checkStatus(Permission.bluetooth);
+      if (status.isGranted) return BluetoothStatus.available;
+      if (status.isPermanentlyDenied) return BluetoothStatus.permissionDenied;
+      return BluetoothStatus.unavailable;
+    } catch (_) {
+      return BluetoothStatus.unavailable;
     }
-    if (status.isPermanentlyDenied) {
-      return BluetoothStatus.permissionDenied;
-    }
-    return BluetoothStatus.unavailable;
   }
 
   /// Requests Bluetooth permission and returns the resulting status.
+  ///
+  /// Never throws — platform errors return [BluetoothStatus.unavailable].
   Future<BluetoothStatus> requestPermission() async {
-    final status = await _permissionService.requestPermission(
-      Permission.bluetooth,
-    );
-
-    if (status.isGranted) {
-      return BluetoothStatus.available;
+    try {
+      final status = await _permissionService.requestPermission(
+        Permission.bluetooth,
+      );
+      if (status.isGranted) return BluetoothStatus.available;
+      if (status.isPermanentlyDenied) return BluetoothStatus.permissionDenied;
+      return BluetoothStatus.unavailable;
+    } catch (_) {
+      return BluetoothStatus.unavailable;
     }
-    if (status.isPermanentlyDenied) {
-      return BluetoothStatus.permissionDenied;
-    }
-    return BluetoothStatus.unavailable;
   }
 }
 
