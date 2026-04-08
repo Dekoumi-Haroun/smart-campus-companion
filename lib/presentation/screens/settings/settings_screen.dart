@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/bluetooth_service.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../blocs/theme/theme_cubit.dart';
 
@@ -20,6 +21,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final SettingsRepository _settingsRepo;
   late bool _notificationsEnabled;
   late String _language;
+  final BluetoothService _bluetoothService = const BluetoothService();
+  BluetoothStatus _bluetoothStatus = BluetoothStatus.unavailable;
+  bool _bluetoothChecked = false;
 
   @override
   void didChangeDependencies() {
@@ -27,6 +31,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _settingsRepo = RepositoryProvider.of<SettingsRepository>(context);
     _notificationsEnabled = _settingsRepo.getNotificationsEnabled();
     _language = _settingsRepo.getLanguage();
+    if (!_bluetoothChecked) {
+      _checkBluetooth();
+    }
+  }
+
+  Future<void> _checkBluetooth() async {
+    _bluetoothChecked = true;
+    final status = await _bluetoothService.checkStatus();
+    if (mounted) {
+      setState(() => _bluetoothStatus = status);
+    }
   }
 
   @override
@@ -144,6 +159,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Divider(),
 
+          // ── Device Features Section ──
+          _SectionHeader(title: AppStrings.deviceFeatures),
+
+          // Bluetooth status
+          ListTile(
+            leading: const Icon(Icons.bluetooth_rounded),
+            title: const Text(AppStrings.bluetooth),
+            trailing: _BluetoothChip(status: _bluetoothStatus),
+            onTap: () => _onBluetoothTap(),
+          ),
+
+          // NFC conceptual
+          ListTile(
+            leading: const Icon(Icons.nfc_rounded),
+            title: const Text(AppStrings.nfc),
+            trailing: Chip(
+              label: Text(
+                AppStrings.nfcConceptual,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+              visualDensity: VisualDensity.compact,
+            ),
+            onTap: () => _showNfcDialog(context),
+          ),
+
+          const Divider(),
+
           // ── Account Section ──
           _SectionHeader(title: AppStrings.account),
           ListTile(
@@ -196,6 +241,98 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _settingsRepo.setLanguage(selected);
       }
     });
+  }
+
+  Future<void> _onBluetoothTap() async {
+    if (_bluetoothStatus != BluetoothStatus.available) {
+      final status = await _bluetoothService.requestPermission();
+      if (!mounted) return;
+      setState(() => _bluetoothStatus = status);
+    }
+    if (!mounted) return;
+    _showBluetoothDialog(context);
+  }
+
+  void _showBluetoothDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.bluetooth_rounded),
+              SizedBox(width: 8),
+              Text(AppStrings.bluetooth),
+            ],
+          ),
+          content: const Text(AppStrings.bluetoothDescription),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showNfcDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.nfc_rounded),
+              SizedBox(width: 8),
+              Text(AppStrings.nfc),
+            ],
+          ),
+          content: const Text(AppStrings.nfcDescription),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BLUETOOTH STATUS CHIP
+// ═══════════════════════════════════════════════════════════════════
+
+class _BluetoothChip extends StatelessWidget {
+  final BluetoothStatus status;
+
+  const _BluetoothChip({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final (label, color) = switch (status) {
+      BluetoothStatus.available => (
+        AppStrings.bluetoothAvailable,
+        Colors.green,
+      ),
+      BluetoothStatus.unavailable => (
+        AppStrings.bluetoothUnavailable,
+        theme.colorScheme.onSurface.withValues(alpha: 0.4),
+      ),
+      BluetoothStatus.permissionDenied => (
+        AppStrings.permissionDeniedTitle,
+        theme.colorScheme.error,
+      ),
+    };
+
+    return Chip(
+      label: Text(label, style: TextStyle(fontSize: 11, color: color)),
+      visualDensity: VisualDensity.compact,
+    );
   }
 }
 

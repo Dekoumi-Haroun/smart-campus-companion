@@ -13,6 +13,7 @@ class AppStrings {
   static const String navHome = 'Home';
   static const String navAnnouncements = 'News';
   static const String navEvents = 'Events';
+  static const String navMap = 'Map';
   static const String navSettings = 'Settings';
 
   // ── Home Screen ──
@@ -72,8 +73,15 @@ class AppStrings {
   static const String attachPhoto = 'Attach Photo';
   static const String attachPhotoComingSoon =
       'Camera integration coming in Sprint 4';
+  static const String changePhoto = 'Change Photo';
+  static const String takePhoto = 'Take Photo';
+  static const String chooseFromGallery = 'Choose from Gallery';
+  static const String photoAttached = 'Photo attached successfully';
   static const String reminderSetFor = 'Reminder set for';
   static const String reminderRemovedFor = 'Reminder removed for';
+
+  // ── Shake to Refresh ──
+  static const String shakeRefreshing = 'Refreshing...';
 
   // ── Settings Screen ──
   static const String settingsTitle = 'Settings';

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/shake_detector.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../domain/entities/announcement.dart';
 import '../../blocs/announcement/announcement_bloc.dart';
@@ -20,6 +23,8 @@ class AnnouncementsScreen extends StatefulWidget {
 class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   final _searchController = TextEditingController();
   String _selectedCategory = AppStrings.filterAll;
+  late final ShakeDetector _shakeDetector;
+  StreamSubscription<void>? _shakeSubscription;
 
   static const _categories = [
     AppStrings.filterAll,
@@ -30,7 +35,27 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _shakeDetector = ShakeDetector();
+    _shakeDetector.start();
+    _shakeSubscription = _shakeDetector.onShake.listen((_) {
+      if (!mounted) return;
+      context.read<AnnouncementBloc>().add(const RefreshAnnouncements());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.shakeRefreshing),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 1),
+        ),
+      );
+    });
+  }
+
+  @override
   void dispose() {
+    _shakeSubscription?.cancel();
+    _shakeDetector.dispose();
     _searchController.dispose();
     super.dispose();
   }

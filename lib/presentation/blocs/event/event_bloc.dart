@@ -15,6 +15,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<RefreshEvents>(_onRefresh);
     on<SearchEvents>(_onSearch);
     on<ToggleReminder>(_onToggleReminder);
+    on<AttachPhoto>(_onAttachPhoto);
   }
 
   Future<void> _onFetch(FetchEvents event, Emitter<EventState> emit) async {
@@ -69,6 +70,20 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     final updatedEvents = currentState.events.map((e) {
       if (e.id == event.eventId) {
         return e.copyWith(isReminded: !e.isReminded);
+      }
+      return e;
+    }).toList();
+
+    emit(EventLoaded(updatedEvents));
+  }
+
+  void _onAttachPhoto(AttachPhoto event, Emitter<EventState> emit) {
+    final currentState = state;
+    if (currentState is! EventLoaded) return;
+
+    final updatedEvents = currentState.events.map((e) {
+      if (e.id == event.eventId) {
+        return e.copyWith(photoPath: event.photoPath);
       }
       return e;
     }).toList();

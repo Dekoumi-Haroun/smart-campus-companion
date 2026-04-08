@@ -13,6 +13,7 @@ class Event {
   final String category;
   final int attendeeCount;
   final bool isReminded;
+  final String? photoPath;
 
   const Event({
     required this.id,
@@ -25,6 +26,7 @@ class Event {
     this.category = '',
     this.attendeeCount = 0,
     this.isReminded = false,
+    this.photoPath,
   });
 
   Event copyWith({
@@ -38,6 +40,7 @@ class Event {
     String? category,
     int? attendeeCount,
     bool? isReminded,
+    String? photoPath,
   }) {
     return Event(
       id: id ?? this.id,
@@ -50,6 +53,7 @@ class Event {
       category: category ?? this.category,
       attendeeCount: attendeeCount ?? this.attendeeCount,
       isReminded: isReminded ?? this.isReminded,
+      photoPath: photoPath ?? this.photoPath,
     );
   }
 
@@ -67,7 +71,8 @@ class Event {
           endTime == other.endTime &&
           category == other.category &&
           attendeeCount == other.attendeeCount &&
-          isReminded == other.isReminded;
+          isReminded == other.isReminded &&
+          photoPath == other.photoPath;
 
   @override
   int get hashCode => Object.hash(
@@ -81,5 +86,6 @@ class Event {
     category,
     attendeeCount,
     isReminded,
+    photoPath,
   );
 }
