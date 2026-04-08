@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_routes.dart';
+import '../presentation/screens/campus_map/campus_map_screen.dart';
 import '../presentation/widgets/main_shell.dart';
 import '../presentation/screens/not_found_screen.dart';
 
@@ -34,8 +35,8 @@ class AppRouter {
       //   final announcementId = settings.arguments as String;
       //   return _buildRoute(AnnouncementDetailScreen(id: announcementId), settings);
       //
-      // case AppRoutes.campusMap:
-      //   return _buildRoute(const CampusMapScreen(), settings);
+      case AppRoutes.campusMap:
+        return _buildRoute(const CampusMapScreen(), settings);
 
       // ── 404 Fallback ──
       default:

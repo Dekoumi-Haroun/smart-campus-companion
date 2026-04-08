@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/image_picker_service.dart';
+import '../../../core/services/permission_service.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../domain/entities/event.dart';
 import '../../blocs/event/event_bloc.dart';
@@ -432,27 +436,37 @@ class _EventCard extends StatelessWidget {
                           ),
                         ),
                         const Spacer(),
-                        // Attach Photo placeholder
-                        GestureDetector(
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(AppStrings.attachPhotoComingSoon),
-                                behavior: SnackBarBehavior.floating,
+                        // Attach Photo — shows thumbnail if already attached
+                        if (event.photoPath != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: Image.file(
+                                File(event.photoPath!),
+                                width: 28,
+                                height: 28,
+                                fit: BoxFit.cover,
                               ),
-                            );
-                          },
+                            ),
+                          ),
+                        GestureDetector(
+                          onTap: () => _showPhotoPickerSheet(context, event),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.camera_alt_outlined,
+                                event.photoPath != null
+                                    ? Icons.camera_alt_rounded
+                                    : Icons.camera_alt_outlined,
                                 size: 14,
                                 color: theme.colorScheme.primary,
                               ),
                               const SizedBox(width: 3),
                               Text(
-                                AppStrings.attachPhoto,
+                                event.photoPath != null
+                                    ? AppStrings.changePhoto
+                                    : AppStrings.attachPhoto,
                                 style: TextStyle(
                                   color: theme.colorScheme.primary,
                                   fontSize: 11,
@@ -577,6 +591,107 @@ class _RemindButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PHOTO PICKER BOTTOM SHEET
+// ═══════════════════════════════════════════════════════════════════
+
+void _showPhotoPickerSheet(BuildContext context, Event event) {
+  final imagePickerService = ImagePickerService();
+
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) {
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ── Handle ──
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                AppStrings.attachPhoto,
+                style: Theme.of(
+                  sheetContext,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_rounded),
+                title: const Text(AppStrings.takePhoto),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  final result = await imagePickerService.pickFromCamera();
+                  if (!context.mounted) return;
+                  _handlePickResult(context, event.id, result);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_rounded),
+                title: const Text(AppStrings.chooseFromGallery),
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  final result = await imagePickerService.pickFromGallery();
+                  if (!context.mounted) return;
+                  _handlePickResult(context, event.id, result);
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void _handlePickResult(
+  BuildContext context,
+  String eventId,
+  PickResult result,
+) {
+  switch (result) {
+    case PickSuccess(:final path):
+      context.read<EventBloc>().add(AttachPhoto(eventId, path));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.photoAttached),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    case PickDenied(:final isPermanentlyDenied):
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isPermanentlyDenied
+                ? AppStrings.permissionPermanentlyDenied
+                : AppStrings.cameraPermissionReason,
+          ),
+          behavior: SnackBarBehavior.floating,
+          action: isPermanentlyDenied
+              ? SnackBarAction(
+                  label: AppStrings.openSettings,
+                  onPressed: () => const PermissionService().openSettings(),
+                )
+              : null,
+        ),
+      );
+    case PickCancelled():
+      break;
   }
 }
 
@@ -728,20 +843,34 @@ void _showEventDetail(BuildContext outerContext, Event event) {
                 ),
                 const SizedBox(height: 12),
 
-                // ── Attach Photo placeholder ──
+                // ── Attached Photo Preview ──
+                if (event.photoPath != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.file(
+                      File(event.photoPath!),
+                      width: double.infinity,
+                      height: 180,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+
+                // ── Attach / Change Photo ──
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      ScaffoldMessenger.of(outerContext).showSnackBar(
-                        const SnackBar(
-                          content: Text(AppStrings.attachPhotoComingSoon),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      Navigator.pop(context);
+                      _showPhotoPickerSheet(outerContext, event);
                     },
                     icon: const Icon(Icons.camera_alt_outlined),
-                    label: const Text(AppStrings.attachPhoto),
+                    label: Text(
+                      event.photoPath != null
+                          ? AppStrings.changePhoto
+                          : AppStrings.attachPhoto,
+                    ),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(

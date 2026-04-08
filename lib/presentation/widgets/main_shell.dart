@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/widgets/common_widgets.dart';
 import '../screens/announcements/announcements_screen.dart';
+import '../screens/campus_map/campus_map_screen.dart';
 import '../screens/events/events_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/settings/settings_screen.dart';
@@ -29,11 +30,12 @@ class MainShellState extends State<MainShell> {
 
   int _currentIndex = 0;
 
-  // The four tab screens — order matches the BottomNavigationBar items.
+  // The five tab screens — order matches the BottomNavigationBar items.
   final List<Widget> _screens = const [
     HomeScreen(),
     AnnouncementsScreen(),
     EventsScreen(),
+    CampusMapScreen(),
     SettingsScreen(),
   ];
 
@@ -91,6 +93,12 @@ class MainShellState extends State<MainShell> {
                 activeIcon: Icon(Icons.event_rounded),
                 label: AppStrings.navEvents,
                 tooltip: 'Campus events',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.map_outlined),
+                activeIcon: Icon(Icons.map_rounded),
+                label: AppStrings.navMap,
+                tooltip: 'Campus map',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings_outlined),

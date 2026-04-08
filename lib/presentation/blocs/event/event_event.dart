@@ -36,3 +36,14 @@ class ToggleReminder extends EventEvent {
   @override
   List<Object?> get props => [eventId];
 }
+
+/// Attach a photo (from camera or gallery) to a specific event.
+class AttachPhoto extends EventEvent {
+  final String eventId;
+  final String photoPath;
+
+  const AttachPhoto(this.eventId, this.photoPath);
+
+  @override
+  List<Object?> get props => [eventId, photoPath];
+}
