@@ -682,6 +682,7 @@ void _handlePickResult(
                 : AppStrings.cameraPermissionReason,
           ),
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
           action: isPermanentlyDenied
               ? SnackBarAction(
                   label: AppStrings.openSettings,

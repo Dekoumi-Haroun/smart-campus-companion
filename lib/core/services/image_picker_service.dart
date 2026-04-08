@@ -20,39 +20,54 @@ class ImagePickerService {
   /// Pick a photo from the device camera.
   ///
   /// Returns a [PickResult] with the file path on success,
-  /// or permission status info on denial.
+  /// or permission status info on denial. Never throws — all
+  /// platform exceptions are caught and returned as [PickDenied].
   Future<PickResult> pickFromCamera() async {
-    final status = await _permissionService.requestPermission(
-      Permission.camera,
-    );
-    if (!status.isGranted) {
-      return PickResult.denied(isPermanentlyDenied: status.isPermanentlyDenied);
+    try {
+      final status = await _permissionService.requestPermission(
+        Permission.camera,
+      );
+      if (!status.isGranted) {
+        return PickResult.denied(
+          isPermanentlyDenied: status.isPermanentlyDenied,
+        );
+      }
+      final file = await _picker.pickImage(source: ImageSource.camera);
+      if (file == null) return const PickResult.cancelled();
+      return PickResult.success(file.path);
+    } catch (_) {
+      // Platform channel or device error — treat as denied.
+      return const PickResult.denied();
     }
-    final file = await _picker.pickImage(source: ImageSource.camera);
-    if (file == null) return const PickResult.cancelled();
-    return PickResult.success(file.path);
   }
 
   /// Pick a photo from the device gallery.
   ///
   /// Returns a [PickResult] with the file path on success,
-  /// or permission status info on denial.
+  /// or permission status info on denial. Never throws — all
+  /// platform exceptions are caught and returned as [PickDenied].
   Future<PickResult> pickFromGallery() async {
-    final status = await _permissionService.requestPermission(
-      Permission.photos,
-    );
-    // On some platforms photos permission may not be needed,
-    // so also try if status is limited or not applicable.
-    if (status.isDenied || status.isPermanentlyDenied) {
-      // Fallback: try picking directly — some platforms don't require
-      // explicit photos permission for the image picker.
+    try {
+      final status = await _permissionService.requestPermission(
+        Permission.photos,
+      );
+      // On some platforms photos permission may not be needed,
+      // so also try if status is limited or not applicable.
+      if (status.isDenied || status.isPermanentlyDenied) {
+        // Fallback: try picking directly — some platforms don't require
+        // explicit photos permission for the image picker.
+        final file = await _picker.pickImage(source: ImageSource.gallery);
+        if (file != null) return PickResult.success(file.path);
+        return PickResult.denied(
+          isPermanentlyDenied: status.isPermanentlyDenied,
+        );
+      }
       final file = await _picker.pickImage(source: ImageSource.gallery);
-      if (file != null) return PickResult.success(file.path);
-      return PickResult.denied(isPermanentlyDenied: status.isPermanentlyDenied);
+      if (file == null) return const PickResult.cancelled();
+      return PickResult.success(file.path);
+    } catch (_) {
+      return const PickResult.denied();
     }
-    final file = await _picker.pickImage(source: ImageSource.gallery);
-    if (file == null) return const PickResult.cancelled();
-    return PickResult.success(file.path);
   }
 }
 

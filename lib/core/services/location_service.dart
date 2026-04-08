@@ -17,30 +17,41 @@ class LocationService {
 
   /// Requests location permission and returns the current position.
   ///
-  /// Returns `null` if permission is denied or location services are off.
+  /// Never throws — all platform exceptions (timeout, service disabled,
+  /// permission errors) are caught and returned as the appropriate
+  /// [LocationResult] variant.
   Future<LocationResult> getCurrentPosition() async {
-    // Check if location services are enabled.
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return const LocationResult.serviceDisabled();
-    }
+    try {
+      // Check if location services are enabled.
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return const LocationResult.serviceDisabled();
+      }
 
-    final status = await _permissionService.requestPermission(
-      Permission.location,
-    );
-    if (!status.isGranted) {
-      return LocationResult.denied(
-        isPermanentlyDenied: status.isPermanentlyDenied,
+      final status = await _permissionService.requestPermission(
+        Permission.location,
       );
-    }
+      if (!status.isGranted) {
+        return LocationResult.denied(
+          isPermanentlyDenied: status.isPermanentlyDenied,
+        );
+      }
 
-    final position = await Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10),
-      ),
-    );
-    return LocationResult.success(position);
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+      return LocationResult.success(position);
+    } on LocationServiceDisabledException {
+      return const LocationResult.serviceDisabled();
+    } on PermissionDeniedException {
+      return const LocationResult.denied();
+    } catch (_) {
+      // Timeout, platform error, or other unexpected failure.
+      return const LocationResult.denied();
+    }
   }
 
   /// Calculates the distance in meters between two coordinates.
