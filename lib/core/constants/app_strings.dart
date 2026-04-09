@@ -131,6 +131,14 @@ class AppStrings {
       'library card scanning, and quick access to campus resources. '
       'Requires android.nfc permission on Android.';
 
+  // ── Notifications (Sprint 5) ──
+  static const String remindMe = 'Remind Me';
+  static const String reminderScheduled =
+      'Reminder set for 10 min before class';
+  static const String reminderCancelled = 'Reminder cancelled';
+  static const String notificationsDisabledMessage =
+      'Enable notifications in Settings to set reminders';
+
   // ── Common ──
   static const String loading = 'Loading...';
   static const String retry = 'Retry';

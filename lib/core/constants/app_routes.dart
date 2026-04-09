@@ -18,4 +18,7 @@ class AppRoutes {
 
   // ── Device Features (Sprint 4) ──
   static const String campusMap = '/map';
+
+  // ── Timetable Detail (Sprint 5 — notification deep link) ──
+  static const String timetableDetail = '/timetable/detail';
 }

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,6 +7,8 @@ import 'core/constants/app_strings.dart';
 import 'core/constants/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router.dart';
+import 'core/services/app_lifecycle_observer.dart';
+import 'core/services/notification_service.dart';
 import 'data/datasources/local/announcement_local_dao.dart';
 import 'data/datasources/local/event_local_dao.dart';
 import 'data/datasources/local/local_database.dart';
@@ -30,6 +34,8 @@ import 'presentation/blocs/theme/theme_cubit.dart';
 /// 1. Provide the [ThemeCubit] to the entire widget tree.
 /// 2. Provide data BLoCs (Announcement, Event, Timetable) via [MultiBlocProvider].
 /// 3. Configure [MaterialApp] with theming, routing, and accessibility.
+/// 4. Manage [AppLifecycleObserver] for background/foreground transitions.
+/// 5. Handle notification deep linking.
 class App extends StatefulWidget {
   final SettingsRepository settingsRepository;
 
@@ -47,6 +53,10 @@ class _AppState extends State<App> {
   late final AnnouncementBloc _announcementBloc;
   late final EventBloc _eventBloc;
   late final TimetableBloc _timetableBloc;
+  late final AppLifecycleObserver _lifecycleObserver;
+
+  /// Navigator key for deep link navigation from notification taps.
+  final _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -80,15 +90,46 @@ class _AppState extends State<App> {
         localDao: timetableDao,
       ),
     )..add(const FetchTimetable());
+
+    // Set up lifecycle observer.
+    _lifecycleObserver = AppLifecycleObserver(
+      announcementBloc: _announcementBloc,
+    );
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
+    _lifecycleObserver.markDataFresh();
+
+    // Wire notification tap handler for deep linking.
+    NotificationService.instance.onNotificationTap = _handleNotificationTap;
+  }
+
+  void _handleNotificationTap(String? payload) {
+    if (payload == null) return;
+    developer.log('Deep link from notification: $payload', name: 'DeepLink');
+
+    final navigator = _navigatorKey.currentState;
+    if (navigator == null) return;
+
+    if (payload.startsWith('timetable:')) {
+      final itemId = payload.replaceFirst('timetable:', '');
+      navigator.pushNamed(AppRoutes.timetableDetail, arguments: itemId);
+    } else if (payload == 'announcements') {
+      // Navigate to main shell and switch to announcements tab.
+      navigator.pushNamed(
+        AppRoutes.home,
+        arguments: 1, // Announcements tab index
+      );
+    }
   }
 
   @override
   void dispose() {
+    _lifecycleObserver.dispose();
     _connectivityCubit.close();
     _announcementBloc.close();
     _eventBloc.close();
     _timetableBloc.close();
     _themeCubit.dispose();
+    NotificationService.instance.onNotificationTap = null;
     super.dispose();
   }
 
@@ -122,6 +163,7 @@ class _AppState extends State<App> {
                 themeMode: themeMode,
 
                 // ── Routing ──
+                navigatorKey: _navigatorKey,
                 initialRoute: AppRoutes.home,
                 onGenerateRoute: AppRouter.generateRoute,
               );

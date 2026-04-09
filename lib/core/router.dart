@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_routes.dart';
 import '../presentation/screens/campus_map/campus_map_screen.dart';
+import '../presentation/screens/timetable/timetable_detail_screen.dart';
 import '../presentation/widgets/main_shell.dart';
 import '../presentation/screens/not_found_screen.dart';
 
@@ -9,7 +10,7 @@ import '../presentation/screens/not_found_screen.dart';
 /// All navigation goes through here, which gives us:
 /// 1. A single place to manage every route in the app.
 /// 2. Easy argument passing via [RouteSettings.arguments].
-/// 3. Deep-link support (needed for notifications in Sprint 5).
+/// 3. Deep-link support for notifications (Sprint 5).
 ///
 /// Usage in [MaterialApp]: `onGenerateRoute: AppRouter.generateRoute`
 class AppRouter {
@@ -19,22 +20,16 @@ class AppRouter {
     switch (settings.name) {
       // ── Main App Shell (tabs) ──
       case AppRoutes.home:
-        return _buildRoute(const MainShell(), settings);
+        final initialTab = settings.arguments is int
+            ? settings.arguments as int
+            : 0;
+        return _buildRoute(MainShell(initialTab: initialTab), settings);
 
-      // ── Future Routes (Sprints 2–6) ──
-      // Uncomment as features are implemented:
-      //
-      // case AppRoutes.login:
-      //   return _buildRoute(const LoginScreen(), settings);
-      //
-      // case AppRoutes.eventDetail:
-      //   final eventId = settings.arguments as String;
-      //   return _buildRoute(EventDetailScreen(id: eventId), settings);
-      //
-      // case AppRoutes.announcementDetail:
-      //   final announcementId = settings.arguments as String;
-      //   return _buildRoute(AnnouncementDetailScreen(id: announcementId), settings);
-      //
+      // ── Timetable Detail (notification deep link) ──
+      case AppRoutes.timetableDetail:
+        final itemId = settings.arguments as String;
+        return _buildRoute(TimetableDetailScreen(itemId: itemId), settings);
+
       case AppRoutes.campusMap:
         return _buildRoute(const CampusMapScreen(), settings);
 

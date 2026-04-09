@@ -27,6 +27,9 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   sensors_plus: ^6.1.1
+  flutter_local_notifications: ^18.0.1
+  workmanager: ^0.5.2
+  timezone: ^0.10.0
 
 dev_dependencies:
   flutter_test:
