@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/notification_service.dart';
+import '../../../data/repositories/settings_repository.dart';
 import '../../../domain/entities/announcement.dart';
 import '../../../domain/entities/event.dart';
 import '../../../domain/entities/timetable_item.dart';
@@ -1019,17 +1021,75 @@ void _showTodayScheduleSheet(
   );
 }
 
-class _ScheduleTile extends StatelessWidget {
+class _ScheduleTile extends StatefulWidget {
   final TimetableItem item;
 
   const _ScheduleTile({required this.item});
 
+  @override
+  State<_ScheduleTile> createState() => _ScheduleTileState();
+}
+
+class _ScheduleTileState extends State<_ScheduleTile> {
+  bool _reminderSet = false;
+  int? _notificationId;
+
   Color _statusColor() {
-    return switch (item.status) {
+    return switch (widget.item.status) {
       'Completed' => AppColors.success,
       'In Progress' => AppColors.warning,
       _ => AppColors.info,
     };
+  }
+
+  Future<void> _toggleReminder() async {
+    final settingsRepo = RepositoryProvider.of<SettingsRepository>(context);
+    if (!settingsRepo.getNotificationsEnabled()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.notificationsDisabledMessage),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final notificationService = NotificationService.instance;
+
+    if (_reminderSet && _notificationId != null) {
+      await notificationService.cancelReminder(_notificationId!);
+      if (mounted) {
+        setState(() {
+          _reminderSet = false;
+          _notificationId = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.reminderCancelled),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } else {
+      final granted = await notificationService.requestPermission();
+      if (!granted) return;
+
+      final id = await notificationService.scheduleClassReminder(widget.item);
+      if (mounted) {
+        setState(() {
+          _reminderSet = true;
+          _notificationId = id;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.reminderScheduled),
+            behavior: SnackBarBehavior.floating,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -1042,40 +1102,80 @@ class _ScheduleTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: _statusColor(), width: 4)),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.courseName,
-                  style: theme.textTheme.titleMedium?.copyWith(
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.item.courseName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${widget.item.startTime} - ${widget.item.endTime}  •  ${widget.item.room}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: _statusColor().withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  widget.item.status,
+                  style: TextStyle(
+                    color: _statusColor(),
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${item.startTime} - ${item.endTime}  •  ${item.room}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: _statusColor().withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              item.status,
-              style: TextStyle(
-                color: _statusColor(),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _toggleReminder,
+              icon: Icon(
+                _reminderSet
+                    ? Icons.notifications_active_rounded
+                    : Icons.notifications_none_rounded,
+                size: 16,
+              ),
+              label: Text(
+                _reminderSet ? AppStrings.reminderSet : AppStrings.remindMe,
+                style: const TextStyle(fontSize: 12),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                foregroundColor: _reminderSet
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                side: BorderSide(
+                  color: _reminderSet
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
             ),
           ),

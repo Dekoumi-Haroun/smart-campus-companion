@@ -14,7 +14,9 @@ import '../screens/settings/settings_screen.dart';
 /// Using [IndexedStack] ensures each tab's state is preserved when
 /// the user switches between tabs (scroll position, form inputs, etc.).
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  final int initialTab;
+
+  const MainShell({super.key, this.initialTab = 0});
 
   @override
   State<MainShell> createState() => MainShellState();
@@ -28,7 +30,7 @@ class MainShellState extends State<MainShell> {
     });
   }
 
-  int _currentIndex = 0;
+  late int _currentIndex = widget.initialTab;
 
   // The five tab screens — order matches the BottomNavigationBar items.
   final List<Widget> _screens = const [

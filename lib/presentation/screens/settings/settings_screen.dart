@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/background_task_service.dart';
 import '../../../core/services/bluetooth_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/services/permission_service.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../blocs/theme/theme_cubit.dart';
@@ -138,11 +140,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: theme.textTheme.bodySmall,
             ),
             value: _notificationsEnabled,
-            onChanged: (value) {
+            onChanged: (value) async {
               setState(() {
                 _notificationsEnabled = value;
               });
-              _settingsRepo.setNotificationsEnabled(value);
+              await _settingsRepo.setNotificationsEnabled(value);
+
+              if (value) {
+                // Re-enable: request permission and restart background tasks.
+                await NotificationService.instance.requestPermission();
+                await BackgroundTaskService.instance.registerPeriodicFetch();
+              } else {
+                // Disable: cancel all pending notifications and background tasks.
+                await NotificationService.instance.cancelAll();
+                await BackgroundTaskService.instance.cancelAll();
+              }
             },
           ),
 
