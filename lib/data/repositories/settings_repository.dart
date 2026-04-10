@@ -6,6 +6,7 @@ class SettingsRepository {
   static const _keyThemeMode = 'theme_mode';
   static const _keyNotificationsEnabled = 'notifications_enabled';
   static const _keyLanguage = 'language';
+  static const _keyBiometricEnabled = 'biometric_enabled';
 
   late final SharedPreferences _prefs;
 
@@ -52,5 +53,15 @@ class SettingsRepository {
 
   Future<void> setLanguage(String lang) async {
     await _prefs.setString(_keyLanguage, lang);
+  }
+
+  // ── Biometric ──
+
+  bool getBiometricEnabled() {
+    return _prefs.getBool(_keyBiometricEnabled) ?? false;
+  }
+
+  Future<void> setBiometricEnabled(bool value) async {
+    await _prefs.setBool(_keyBiometricEnabled, value);
   }
 }

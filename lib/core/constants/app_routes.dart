@@ -11,6 +11,7 @@ class AppRoutes {
 
   // ── Auth (Sprint 6) ──
   static const String login = '/login';
+  static const String biometricPrompt = '/biometric';
 
   // ── Detail Screens (Future Sprints) ──
   static const String eventDetail = '/events/detail';

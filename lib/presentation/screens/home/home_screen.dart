@@ -11,6 +11,8 @@ import '../../../domain/entities/event.dart';
 import '../../../domain/entities/timetable_item.dart';
 import '../../blocs/announcement/announcement_bloc.dart';
 import '../../blocs/announcement/announcement_state.dart';
+import '../../blocs/auth/auth_cubit.dart';
+import '../../blocs/auth/auth_state.dart';
 import '../../blocs/connectivity/connectivity_cubit.dart';
 import '../../blocs/connectivity/connectivity_state.dart';
 import '../../blocs/event/event_bloc.dart';
@@ -28,26 +30,32 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Performance: Using CustomScrollView with slivers for lazy rendering
+    // instead of SingleChildScrollView + Column.
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Header(theme: theme),
-              const SizedBox(height: 20),
-              const _CurrentClassCard(),
-              const SizedBox(height: 20),
-              const _StatsSummaryRow(),
-              const SizedBox(height: 24),
-              const _AnnouncementsPreview(),
-              const SizedBox(height: 24),
-              const _UpcomingEventsPreview(),
-              const SizedBox(height: 24),
-              const _BottomActionButtons(),
-            ],
-          ),
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _Header(theme: theme),
+                  const SizedBox(height: 20),
+                  const _CurrentClassCard(),
+                  const SizedBox(height: 20),
+                  const _StatsSummaryRow(),
+                  const SizedBox(height: 24),
+                  const _AnnouncementsPreview(),
+                  const SizedBox(height: 24),
+                  const _UpcomingEventsPreview(),
+                  const SizedBox(height: 24),
+                  const _BottomActionButtons(),
+                  const SizedBox(height: 24),
+                ]),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -80,11 +88,18 @@ class _Header extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Text(
-                    '${_greeting()}, ${AppStrings.userName}',
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                  BlocBuilder<AuthCubit, AuthState>(
+                    builder: (context, authState) {
+                      final name = authState is AuthAuthenticated
+                          ? authState.user.displayName
+                          : AppStrings.userName;
+                      return Text(
+                        '${_greeting()}, $name',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 8),
                   BlocBuilder<ConnectivityCubit, ConnectivityState>(
@@ -151,69 +166,80 @@ class _ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      offset: const Offset(0, 48),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onSelected: (value) {
-        if (value == 'sign_out') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Sign out — Coming in Sprint 6')),
-          );
-        }
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, authState) {
+        final userName = authState is AuthAuthenticated
+            ? authState.user.displayName
+            : AppStrings.userName;
+        final userEmail = authState is AuthAuthenticated
+            ? authState.user.email
+            : AppStrings.userEmail;
+
+        return PopupMenuButton<String>(
+          offset: const Offset(0, 48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          onSelected: (value) {
+            if (value == 'sign_out') {
+              context.read<AuthCubit>().logout();
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem<String>(
+              enabled: false,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Text(
+                    userEmail,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const Divider(),
+                ],
+              ),
+            ),
+            const PopupMenuItem<String>(
+              value: 'profile',
+              child: ListTile(
+                leading: Icon(Icons.person_outline_rounded),
+                title: Text(AppStrings.viewProfile),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem<String>(
+              value: 'sign_out',
+              child: ListTile(
+                leading: Icon(Icons.logout_rounded, color: AppColors.error),
+                title: Text(AppStrings.signOut),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+            child: Text(
+              userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        );
       },
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          enabled: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.userName,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                AppStrings.userEmail,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-              const Divider(),
-            ],
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'profile',
-          child: ListTile(
-            leading: Icon(Icons.person_outline_rounded),
-            title: Text(AppStrings.viewProfile),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'sign_out',
-          child: ListTile(
-            leading: Icon(Icons.logout_rounded, color: AppColors.error),
-            title: Text(AppStrings.signOut),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-      ],
-      child: CircleAvatar(
-        radius: 22,
-        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-        child: Text(
-          AppStrings.userName[0].toUpperCase(),
-          style: TextStyle(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-      ),
     );
   }
 }

@@ -4,22 +4,28 @@ import 'package:flutter/widgets.dart';
 
 import '../../presentation/blocs/announcement/announcement_bloc.dart';
 import '../../presentation/blocs/announcement/announcement_event.dart';
+import '../../presentation/blocs/auth/auth_cubit.dart';
 
 /// Observes app lifecycle transitions and reacts accordingly.
 ///
 /// - **resumed**: refreshes data if stale (> 5 minutes since last fetch).
+///   If biometric login is enabled, triggers re-authentication check.
 /// - **paused**: logs the transition (state saving would go here).
-/// - All transitions are logged for the Sprint 5 report.
+/// - All transitions are logged for the Sprint 5/6 reports.
 class AppLifecycleObserver extends WidgetsBindingObserver {
   final AnnouncementBloc _announcementBloc;
+  final AuthCubit? _authCubit;
 
   DateTime _lastFetchTime = DateTime.now();
 
   /// How long before we consider data stale.
   static const _staleThreshold = Duration(minutes: 5);
 
-  AppLifecycleObserver({required AnnouncementBloc announcementBloc})
-    : _announcementBloc = announcementBloc;
+  AppLifecycleObserver({
+    required AnnouncementBloc announcementBloc,
+    AuthCubit? authCubit,
+  }) : _announcementBloc = announcementBloc,
+       _authCubit = authCubit;
 
   /// Call this after the initial data fetch to set the baseline.
   void markDataFresh() {
@@ -53,6 +59,15 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
       );
       _announcementBloc.add(const RefreshAnnouncements());
       _lastFetchTime = DateTime.now();
+
+      // Re-trigger auth check to prompt biometric if enabled.
+      if (_authCubit != null) {
+        developer.log(
+          'Re-checking auth status after stale period',
+          name: 'Lifecycle',
+        );
+        _authCubit.checkAuthStatus();
+      }
     } else {
       developer.log(
         'Data is fresh (${elapsed.inSeconds}s old), skipping refresh',

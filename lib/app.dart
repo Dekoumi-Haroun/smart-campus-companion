@@ -16,11 +16,14 @@ import 'data/datasources/local/timetable_local_dao.dart';
 import 'data/datasources/local/secure_storage_service.dart';
 import 'data/datasources/remote/api_client.dart';
 import 'data/repositories/announcement_repository_impl.dart';
+import 'data/repositories/auth_repository_impl.dart';
 import 'data/repositories/event_repository_impl.dart';
 import 'data/repositories/settings_repository.dart';
 import 'data/repositories/timetable_repository_impl.dart';
 import 'presentation/blocs/announcement/announcement_bloc.dart';
 import 'presentation/blocs/announcement/announcement_event.dart';
+import 'presentation/blocs/auth/auth_cubit.dart';
+import 'presentation/blocs/auth/auth_state.dart';
 import 'presentation/blocs/event/event_bloc.dart';
 import 'presentation/blocs/event/event_event.dart';
 import 'presentation/blocs/timetable/timetable_bloc.dart';
@@ -50,6 +53,7 @@ class _AppState extends State<App> {
   final _connectivityCubit = ConnectivityCubit();
   late final SecureStorageService _secureStorageService;
   late final ApiClient _apiClient;
+  late final AuthCubit _authCubit;
   late final AnnouncementBloc _announcementBloc;
   late final EventBloc _eventBloc;
   late final TimetableBloc _timetableBloc;
@@ -64,6 +68,16 @@ class _AppState extends State<App> {
     _themeCubit = ThemeCubit(widget.settingsRepository);
     _secureStorageService = SecureStorageService();
     _apiClient = ApiClient();
+
+    // Initialize auth.
+    final authRepository = AuthRepositoryImpl(
+      apiClient: _apiClient,
+      secureStorage: _secureStorageService,
+    );
+    _authCubit = AuthCubit(
+      authRepository: authRepository,
+      settingsRepository: widget.settingsRepository,
+    )..checkAuthStatus();
 
     final localDb = LocalDatabase.instance;
     final announcementDao = AnnouncementLocalDao(localDb);
@@ -94,6 +108,7 @@ class _AppState extends State<App> {
     // Set up lifecycle observer.
     _lifecycleObserver = AppLifecycleObserver(
       announcementBloc: _announcementBloc,
+      authCubit: _authCubit,
     );
     WidgetsBinding.instance.addObserver(_lifecycleObserver);
     _lifecycleObserver.markDataFresh();
@@ -125,6 +140,7 @@ class _AppState extends State<App> {
   void dispose() {
     _lifecycleObserver.dispose();
     _connectivityCubit.close();
+    _authCubit.close();
     _announcementBloc.close();
     _eventBloc.close();
     _timetableBloc.close();
@@ -138,6 +154,7 @@ class _AppState extends State<App> {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: _connectivityCubit),
+        BlocProvider.value(value: _authCubit),
         BlocProvider.value(value: _announcementBloc),
         BlocProvider.value(value: _eventBloc),
         BlocProvider.value(value: _timetableBloc),
@@ -152,20 +169,50 @@ class _AppState extends State<App> {
           child: ValueListenableBuilder<ThemeMode>(
             valueListenable: _themeCubit,
             builder: (context, themeMode, _) {
-              return MaterialApp(
-                // ── Identity ──
-                title: AppStrings.appName,
-                debugShowCheckedModeBanner: false,
+              return BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, authState) {
+                  // Show loading splash while checking stored session.
+                  if (authState is AuthUnknown) {
+                    return MaterialApp(
+                      title: AppStrings.appName,
+                      debugShowCheckedModeBanner: false,
+                      theme: AppTheme.light,
+                      darkTheme: AppTheme.dark,
+                      themeMode: themeMode,
+                      home: const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      ),
+                    );
+                  }
 
-                // ── Theming ──
-                theme: AppTheme.light,
-                darkTheme: AppTheme.dark,
-                themeMode: themeMode,
+                  final String initialRoute;
+                  if (authState is AuthAuthenticated) {
+                    initialRoute = AppRoutes.home;
+                  } else if (authState is AuthBiometricRequired) {
+                    initialRoute = AppRoutes.biometricPrompt;
+                  } else {
+                    initialRoute = AppRoutes.login;
+                  }
 
-                // ── Routing ──
-                navigatorKey: _navigatorKey,
-                initialRoute: AppRoutes.home,
-                onGenerateRoute: AppRouter.generateRoute,
+                  return MaterialApp(
+                    // Force rebuild when auth state changes route.
+                    key: ValueKey(initialRoute),
+
+                    // ── Identity ──
+                    title: AppStrings.appName,
+                    debugShowCheckedModeBanner: false,
+
+                    // ── Theming ──
+                    theme: AppTheme.light,
+                    darkTheme: AppTheme.dark,
+                    themeMode: themeMode,
+
+                    // ── Routing ──
+                    navigatorKey: _navigatorKey,
+                    initialRoute: initialRoute,
+                    onGenerateRoute: AppRouter.generateRoute,
+                  );
+                },
               );
             },
           ),

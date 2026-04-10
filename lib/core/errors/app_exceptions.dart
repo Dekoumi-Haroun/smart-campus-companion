@@ -37,3 +37,10 @@ class CacheException extends AppException {
         'Could not load cached data. Please connect to the internet.',
   ]);
 }
+
+/// Thrown when authentication fails (invalid credentials, expired session, etc.).
+class AuthException extends AppException {
+  const AuthException([
+    super.message = 'Authentication failed. Please try again.',
+  ]);
+}

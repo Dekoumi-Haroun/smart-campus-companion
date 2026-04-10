@@ -5,6 +5,23 @@ import 'package:flutter/foundation.dart';
 
 import 'mock_data.dart';
 
+// ══════════════════════════════════════════════════════════════════
+// OWASP Mobile Security Considerations:
+// 1. HTTPS Only: BaseOptions uses https:// scheme exclusively.
+//    In production, enforce certificate pinning via Dio's
+//    SecurityContext or a native plugin (e.g. ssl_pinning_plugin).
+// 2. No Sensitive Data in Logs: LogInterceptor has requestBody: false
+//    to avoid logging credentials. In production, disable
+//    responseBody logging as well.
+// 3. No Hardcoded Secrets: API keys and tokens are stored in
+//    FlutterSecureStorage, never in source code. The mock JWT is
+//    for development only.
+// 4. Input Sanitization: All user input is validated at the form
+//    level before being sent to the API.
+// 5. Certificate Pinning (concept): In production, add a custom
+//    SecurityContext with pinned certificates to Dio's HttpClient.
+// ══════════════════════════════════════════════════════════════════
+
 /// Centralized HTTP client for all API communication.
 ///
 /// Configured with proper timeouts, logging, and error handling.
@@ -35,6 +52,10 @@ class ApiClient {
 
   /// Generic GET request.
   Future<Response> get(String path) => _dio.get(path);
+
+  /// Generic POST request.
+  Future<Response> post(String path, {Map<String, dynamic>? data}) =>
+      _dio.post(path, data: data);
 
   /// GET request that extracts and returns a JSON list.
   Future<List<dynamic>> getList(String path) async {
@@ -68,6 +89,42 @@ class MockInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    // Handle POST /auth/login mock.
+    if (options.method == 'POST' && options.path == '/auth/login') {
+      await Future.delayed(_delay);
+      final data = options.data as Map<String, dynamic>?;
+      final email = data?['email'] ?? '';
+      final password = data?['password'] ?? '';
+
+      if (email == 'student@smartcampus.dev' && password == 'campus123') {
+        handler.resolve(
+          Response(
+            requestOptions: options,
+            statusCode: 200,
+            data: {
+              'token': 'mock_jwt_${DateTime.now().millisecondsSinceEpoch}',
+              'email': email,
+              'displayName': 'Maxframe',
+              'issuedAt': DateTime.now().toIso8601String(),
+            },
+          ),
+        );
+      } else {
+        handler.reject(
+          DioException(
+            requestOptions: options,
+            response: Response(
+              requestOptions: options,
+              statusCode: 401,
+              data: {'error': 'Invalid credentials'},
+            ),
+            type: DioExceptionType.badResponse,
+          ),
+        );
+      }
+      return;
+    }
+
     final mockData = _routes[options.path];
     if (mockData != null) {
       // Simulate network latency so loading states are visible.

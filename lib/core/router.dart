@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_routes.dart';
+import '../presentation/screens/auth/biometric_prompt_screen.dart';
+import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/campus_map/campus_map_screen.dart';
 import '../presentation/screens/timetable/timetable_detail_screen.dart';
 import '../presentation/widgets/main_shell.dart';
@@ -18,6 +20,13 @@ class AppRouter {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      // ── Auth ──
+      case AppRoutes.login:
+        return _buildRoute(const LoginScreen(), settings);
+
+      case AppRoutes.biometricPrompt:
+        return _buildRoute(const BiometricPromptScreen(), settings);
+
       // ── Main App Shell (tabs) ──
       case AppRoutes.home:
         final initialTab = settings.arguments is int

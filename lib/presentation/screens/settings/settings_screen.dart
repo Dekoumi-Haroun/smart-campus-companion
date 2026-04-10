@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/services/background_task_service.dart';
+import '../../../core/services/biometric_service.dart';
 import '../../../core/services/bluetooth_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/permission_service.dart';
 import '../../../data/repositories/settings_repository.dart';
+import '../../blocs/auth/auth_cubit.dart';
 import '../../blocs/theme/theme_cubit.dart';
 
 /// Settings screen.
@@ -24,7 +26,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final SettingsRepository _settingsRepo;
   late bool _notificationsEnabled;
   late String _language;
+  late bool _biometricEnabled;
   final BluetoothService _bluetoothService = const BluetoothService();
+  final BiometricService _biometricService = BiometricService();
   BluetoothStatus _bluetoothStatus = BluetoothStatus.unavailable;
   bool _bluetoothChecked = false;
 
@@ -34,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _settingsRepo = RepositoryProvider.of<SettingsRepository>(context);
     _notificationsEnabled = _settingsRepo.getNotificationsEnabled();
     _language = _settingsRepo.getLanguage();
+    _biometricEnabled = _settingsRepo.getBiometricEnabled();
     if (!_bluetoothChecked) {
       _checkBluetooth();
     }
@@ -204,15 +209,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ── Account Section ──
           _SectionHeader(title: AppStrings.account),
+
+          // Biometric toggle
+          SwitchListTile(
+            secondary: const Icon(Icons.fingerprint_rounded),
+            title: const Text(AppStrings.enableBiometric),
+            subtitle: Text(
+              AppStrings.biometricLoginDescription,
+              style: theme.textTheme.bodySmall,
+            ),
+            value: _biometricEnabled,
+            onChanged: (value) async {
+              if (value) {
+                final messenger = ScaffoldMessenger.of(context);
+                final available = await _biometricService.isAvailable();
+                if (!available) {
+                  if (!mounted) return;
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text(AppStrings.biometricNotAvailable),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+              }
+              setState(() => _biometricEnabled = value);
+              await _settingsRepo.setBiometricEnabled(value);
+            },
+          ),
+
           ListTile(
             leading: Icon(Icons.logout_rounded, color: theme.colorScheme.error),
             title: Text(
               AppStrings.logout,
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            onTap: () {
-              // TODO: Implement logout in Sprint 6
-            },
+            onTap: () => _showLogoutDialog(context),
           ),
 
           const Divider(),
@@ -319,6 +352,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text(AppStrings.logoutConfirmTitle),
+          content: const Text(AppStrings.logoutConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text(AppStrings.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                context.read<AuthCubit>().logout();
+              },
+              child: Text(
+                AppStrings.logout,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
             ),
           ],
         );
