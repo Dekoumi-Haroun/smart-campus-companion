@@ -32,14 +32,16 @@ class AnnouncementModel {
   factory AnnouncementModel.fromJson(Map<String, dynamic> json) {
     return AnnouncementModel(
       id: json['id']?.toString() ?? '',
-      title: json['title'] ?? '',
-      body: json['body'] ?? '',
-      category: json['category'] ?? 'General',
-      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
-      summary: json['summary'] ?? '',
-      source: json['source'] ?? '',
-      readTime: json['readTime'] ?? 0,
-      isBookmarked: json['isBookmarked'] ?? false,
+      title: json['title']?.toString() ?? '',
+      body: json['body']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'General',
+      date: DateTime.tryParse(json['date']?.toString() ?? '') ?? DateTime.now(),
+      summary: json['summary']?.toString() ?? '',
+      source: json['source']?.toString() ?? '',
+      readTime: json['readTime'] is int ? json['readTime'] as int : 0,
+      isBookmarked: json['isBookmarked'] is bool
+          ? json['isBookmarked'] as bool
+          : false,
     );
   }
 

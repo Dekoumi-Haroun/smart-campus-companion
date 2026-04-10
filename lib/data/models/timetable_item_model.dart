@@ -29,13 +29,13 @@ class TimetableItemModel {
   factory TimetableItemModel.fromJson(Map<String, dynamic> json) {
     return TimetableItemModel(
       id: json['id']?.toString() ?? '',
-      courseName: json['courseName'] ?? '',
-      instructor: json['instructor'] ?? '',
-      room: json['room'] ?? '',
-      dayOfWeek: json['dayOfWeek'] ?? 1,
-      startTime: json['startTime'] ?? '',
-      endTime: json['endTime'] ?? '',
-      status: json['status'] ?? 'Upcoming',
+      courseName: json['courseName']?.toString() ?? '',
+      instructor: json['instructor']?.toString() ?? '',
+      room: json['room']?.toString() ?? '',
+      dayOfWeek: json['dayOfWeek'] is int ? json['dayOfWeek'] as int : 1,
+      startTime: json['startTime']?.toString() ?? '',
+      endTime: json['endTime']?.toString() ?? '',
+      status: json['status']?.toString() ?? 'Upcoming',
     );
   }
 

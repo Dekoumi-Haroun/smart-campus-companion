@@ -39,6 +39,12 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
     _fetchLocation();
   }
 
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchLocation() async {
     setState(() {
       _loading = true;
