@@ -33,17 +33,23 @@ class EventModel {
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
       id: json['id']?.toString() ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      location: json['location'] ?? '',
-      dateTime: DateTime.tryParse(json['dateTime'] ?? '') ?? DateTime.now(),
-      imageUrl: json['imageUrl'],
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      location: json['location']?.toString() ?? '',
+      dateTime:
+          DateTime.tryParse(json['dateTime']?.toString() ?? '') ??
+          DateTime.now(),
+      imageUrl: json['imageUrl']?.toString(),
       endTime: json['endTime'] != null
-          ? DateTime.tryParse(json['endTime'])
+          ? DateTime.tryParse(json['endTime'].toString())
           : null,
-      category: json['category'] ?? '',
-      attendeeCount: json['attendeeCount'] ?? 0,
-      isReminded: json['isReminded'] ?? false,
+      category: json['category']?.toString() ?? '',
+      attendeeCount: json['attendeeCount'] is int
+          ? json['attendeeCount'] as int
+          : 0,
+      isReminded: json['isReminded'] is bool
+          ? json['isReminded'] as bool
+          : false,
     );
   }
 

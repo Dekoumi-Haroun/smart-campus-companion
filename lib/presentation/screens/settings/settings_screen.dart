@@ -23,7 +23,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late final SettingsRepository _settingsRepo;
+  late SettingsRepository _settingsRepo;
   late bool _notificationsEnabled;
   late String _language;
   late bool _biometricEnabled;
