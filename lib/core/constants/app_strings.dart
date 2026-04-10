@@ -139,6 +139,35 @@ class AppStrings {
   static const String notificationsDisabledMessage =
       'Enable notifications in Settings to set reminders';
 
+  // ── Auth (Sprint 6) ──
+  static const String loginTitle = 'Welcome to SmartCampus';
+  static const String loginSubtitle = 'Sign in to continue';
+  static const String emailHint = 'Email';
+  static const String passwordHint = 'Password';
+  static const String loginButton = 'Sign In';
+  static const String invalidEmail = 'Please enter a valid email';
+  static const String invalidPassword =
+      'Password must be at least 6 characters';
+  static const String loginFailed = 'Invalid email or password';
+  static const String biometricPromptTitle = 'Verify Your Identity';
+  static const String biometricPromptSubtitle =
+      'Use biometrics to unlock SmartCampus';
+  static const String biometricFallback = 'Use Password Instead';
+  static const String tryAgain = 'Try Again';
+  static const String enableBiometric = 'Biometric Login';
+  static const String biometricLoginDescription =
+      'Use fingerprint or face recognition to unlock';
+  static const String biometricNotAvailable =
+      'Biometric authentication is not available on this device';
+  static const String sessionExpired =
+      'Your session has expired. Please log in again.';
+  static const String logoutConfirmTitle = 'Log Out';
+  static const String logoutConfirmMessage =
+      'Are you sure you want to log out?';
+  static const String cancel = 'Cancel';
+  static const String demoCredentials =
+      'Demo: student@smartcampus.dev / campus123';
+
   // ── Common ──
   static const String loading = 'Loading...';
   static const String retry = 'Retry';

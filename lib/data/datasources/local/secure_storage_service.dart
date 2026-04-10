@@ -1,5 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+// OWASP: Tokens and sensitive credentials are stored via platform-native
+// secure storage (iOS Keychain / Android EncryptedSharedPreferences).
+// Never log token values. deleteAll() is used on logout to prevent
+// token leakage. No sensitive data is persisted in plain SharedPreferences.
+
 class SecureStorageService {
   final FlutterSecureStorage _storage;
 
