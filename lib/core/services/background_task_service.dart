@@ -110,7 +110,7 @@ class BackgroundTaskService {
       backgroundFetchTask,
       frequency: const Duration(minutes: 15),
       constraints: Constraints(networkType: NetworkType.connected),
-      existingWorkPolicy: ExistingWorkPolicy.replace,
+
     );
     developer.log(
       'Registered periodic fetch task (15min)',
