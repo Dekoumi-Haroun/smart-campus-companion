@@ -27,8 +27,9 @@ import 'widgets/storage_section.dart';
 
 /// Settings screen.
 ///
-/// Groups: Appearance, Notifications, Language, Device Features,
-/// Storage & Data, Permissions, Admin Panel (conditional), Account, About.
+/// Groups: Admin Panel (conditional, pinned to top), Appearance,
+/// Notifications, Language, Device Features, Storage & Data, Permissions,
+/// Account, About.
 ///
 /// Theme / notifications / language / biometric / Bluetooth-opt-in are
 /// persisted via [SettingsRepository]. The Storage card reads live cache
@@ -129,6 +130,45 @@ class _SettingsScreenState extends State<SettingsScreen>
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
+          // ───────────────────────────── Admin ──────────────────────────────
+          // Pinned to the top so admins land directly on the entry point
+          // to manage announcements, events, and timetable. Collapses to
+          // zero height for non-admin users.
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, authState) {
+              if (authState is! AuthAuthenticated || !authState.user.isAdmin) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SectionHeader(title: AppStrings.adminPanel),
+                  ListTile(
+                    leading: Icon(
+                      Icons.admin_panel_settings_rounded,
+                      color: theme.colorScheme.primary,
+                    ),
+                    title: Text(
+                      AppStrings.adminPanel,
+                      style: TextStyle(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Manage announcements, events & timetable',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.adminDashboard),
+                  ),
+                  const Divider(),
+                ],
+              );
+            },
+          ),
+
           // ─────────────────────────── Appearance ───────────────────────────
           _SectionHeader(title: AppStrings.appearance),
           _ThemeSelector(themeCubit: themeCubit),
@@ -205,42 +245,6 @@ class _SettingsScreenState extends State<SettingsScreen>
           ),
 
           const Divider(),
-
-          // ───────────────────────────── Admin ──────────────────────────────
-          BlocBuilder<AuthCubit, AuthState>(
-            builder: (context, authState) {
-              if (authState is! AuthAuthenticated || !authState.user.isAdmin) {
-                return const SizedBox.shrink();
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SectionHeader(title: AppStrings.adminPanel),
-                  ListTile(
-                    leading: Icon(
-                      Icons.admin_panel_settings_rounded,
-                      color: theme.colorScheme.primary,
-                    ),
-                    title: Text(
-                      AppStrings.adminPanel,
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Manage announcements, events & timetable',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () =>
-                        Navigator.pushNamed(context, AppRoutes.adminDashboard),
-                  ),
-                  const Divider(),
-                ],
-              );
-            },
-          ),
 
           // ─────────────────────────── Account ──────────────────────────────
           _SectionHeader(title: AppStrings.account),

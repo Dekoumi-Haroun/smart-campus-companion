@@ -39,7 +39,10 @@ class TimetableRepositoryImpl implements TimetableRepository {
           .toList();
       await _localDao.insertAll(models);
       await _settingsRepo?.markSynced();
-      return models.map((m) => m.toEntity()).toList();
+      // Read back from the DAO so admin-created / admin-edited rows
+      // (isLocal = 1) are included alongside the refreshed server rows.
+      final merged = await _localDao.getAll();
+      return merged.map((m) => m.toEntity()).toList();
     } on DioException {
       final cached = await _localDao.getAll();
       if (cached.isNotEmpty) return cached.map((m) => m.toEntity()).toList();
@@ -65,7 +68,9 @@ class TimetableRepositoryImpl implements TimetableRepository {
           )
           .toList();
       await _localDao.insertAll(models);
-      items = models.map((m) => m.toEntity()).toList();
+      // Export the merged view so admin-authored items are included.
+      final merged = await _localDao.getAll();
+      items = merged.map((m) => m.toEntity()).toList();
     } on DioException {
       final cached = await _localDao.getAll();
       if (cached.isEmpty) throw const CacheException();

@@ -34,7 +34,10 @@ class EventRepositoryImpl implements EventRepository {
           .toList();
       await _localDao.insertAll(models);
       await _settingsRepo?.markSynced();
-      return models.map((m) => m.toEntity()).toList();
+      // Read back from the DAO so admin-created / admin-edited rows
+      // (isLocal = 1) are included alongside the refreshed server rows.
+      final merged = await _localDao.getAll();
+      return merged.map((m) => m.toEntity()).toList();
     } on DioException {
       final cached = await _localDao.getAll();
       if (cached.isNotEmpty) return cached.map((m) => m.toEntity()).toList();
@@ -51,7 +54,9 @@ class EventRepositoryImpl implements EventRepository {
           .toList();
       await _localDao.insertAll(models);
       await _settingsRepo?.markSynced();
-      final match = models.where((m) => m.id == id).toList();
+      // Source from cache so admin-only rows are discoverable by id.
+      final merged = await _localDao.getAll();
+      final match = merged.where((m) => m.id == id).toList();
       return match.isEmpty ? null : match.first.toEntity();
     } on DioException {
       final cached = await _localDao.getAll();
