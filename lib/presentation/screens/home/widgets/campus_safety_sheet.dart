@@ -103,10 +103,7 @@ class _CampusSafetySheet extends StatelessWidget {
                   icon: const Icon(Icons.phone_rounded),
                   label: const Text(
                     AppStrings.callSecurityNow,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.error,

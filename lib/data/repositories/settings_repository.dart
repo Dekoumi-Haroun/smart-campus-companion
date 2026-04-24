@@ -136,8 +136,7 @@ class SettingsRepository {
   Future<void> setCameraRevoked(bool value) =>
       _prefs.setBool(_keyAppRevokedCamera, value);
 
-  bool getLocationRevoked() =>
-      _prefs.getBool(_keyAppRevokedLocation) ?? false;
+  bool getLocationRevoked() => _prefs.getBool(_keyAppRevokedLocation) ?? false;
   Future<void> setLocationRevoked(bool value) =>
       _prefs.setBool(_keyAppRevokedLocation, value);
 
@@ -150,8 +149,7 @@ class SettingsRepository {
   Future<void> setCameraRequested(bool value) =>
       _prefs.setBool(_keyRequestedCamera, value);
 
-  bool getLocationRequested() =>
-      _prefs.getBool(_keyRequestedLocation) ?? false;
+  bool getLocationRequested() => _prefs.getBool(_keyRequestedLocation) ?? false;
   Future<void> setLocationRequested(bool value) =>
       _prefs.setBool(_keyRequestedLocation, value);
 

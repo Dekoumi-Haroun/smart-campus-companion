@@ -46,7 +46,8 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
     _descCtrl = TextEditingController(text: e?.description ?? '');
     _locationCtrl = TextEditingController(text: e?.location ?? '');
     _attendeeCtrl = TextEditingController(
-        text: e?.attendeeCount != null ? e!.attendeeCount.toString() : '0');
+      text: e?.attendeeCount != null ? e!.attendeeCount.toString() : '0',
+    );
     _category = e?.category.isNotEmpty == true ? e!.category : 'General';
     _dateTime = e?.dateTime ?? DateTime.now().add(const Duration(days: 1));
     _endTime = e?.endTime;
@@ -78,7 +79,12 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
     if (time == null || !mounted) return;
 
     final picked = DateTime(
-        date.year, date.month, date.day, time.hour, time.minute);
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
     setState(() {
       if (isEnd) {
         _endTime = picked;
@@ -130,13 +136,24 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _textField(_titleCtrl, AppStrings.titleLabel, validator: _required),
+                _textField(
+                  _titleCtrl,
+                  AppStrings.titleLabel,
+                  validator: _required,
+                ),
                 const SizedBox(height: 16),
-                _textField(_descCtrl, AppStrings.descriptionLabel,
-                    maxLines: 4, validator: _required),
+                _textField(
+                  _descCtrl,
+                  AppStrings.descriptionLabel,
+                  maxLines: 4,
+                  validator: _required,
+                ),
                 const SizedBox(height: 16),
-                _textField(_locationCtrl, AppStrings.locationLabel,
-                    validator: _required),
+                _textField(
+                  _locationCtrl,
+                  AppStrings.locationLabel,
+                  validator: _required,
+                ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   value: _category,
@@ -151,8 +168,11 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
                   onChanged: (v) => setState(() => _category = v!),
                 ),
                 const SizedBox(height: 16),
-                _textField(_attendeeCtrl, AppStrings.attendeeCountLabel,
-                    keyboardType: TextInputType.number),
+                _textField(
+                  _attendeeCtrl,
+                  AppStrings.attendeeCountLabel,
+                  keyboardType: TextInputType.number,
+                ),
                 const SizedBox(height: 16),
 
                 // Date & Time picker
@@ -164,8 +184,7 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
                 const SizedBox(height: 8),
                 _DateTimeTile(
                   label: AppStrings.endDateLabel,
-                  value:
-                      _endTime != null ? fmt.format(_endTime!) : 'Not set',
+                  value: _endTime != null ? fmt.format(_endTime!) : 'Not set',
                   onTap: () => _pickDateTime(isEnd: true),
                   onClear: _endTime != null
                       ? () => setState(() => _endTime = null)
@@ -203,7 +222,10 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
       maxLines: maxLines,
       keyboardType: keyboardType,
       decoration: InputDecoration(
-          labelText: label, border: const OutlineInputBorder(), filled: true),
+        labelText: label,
+        border: const OutlineInputBorder(),
+        filled: true,
+      ),
       validator: validator,
     );
   }

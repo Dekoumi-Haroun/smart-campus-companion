@@ -51,10 +51,11 @@ class UpcomingEventsPreview extends StatelessWidget {
               // Upcoming = not yet completed. Sort nearest-first so the top
               // card always represents what the user should care about next.
               final now = DateTime.now();
-              final upcoming = state.events
-                  .where((e) => e.statusAt(now) != EventStatus.completed)
-                  .toList()
-                ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+              final upcoming =
+                  state.events
+                      .where((e) => e.statusAt(now) != EventStatus.completed)
+                      .toList()
+                    ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
 
               if (upcoming.isEmpty) {
                 return const SizedBox(
@@ -160,8 +161,7 @@ class _EventMiniCard extends StatelessWidget {
                   Text(
                     DateFormat('MMM d, h:mm a').format(event.dateTime),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                          theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ],

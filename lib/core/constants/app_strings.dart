@@ -46,7 +46,8 @@ class AppStrings {
   static const String safetyNumberFire = '14';
   static const String callSecurityNow = 'Call Security Now';
   static const String close = 'Close';
-  static const String callFailedMessage = 'Could not launch the dialer on this device.';
+  static const String callFailedMessage =
+      'Could not launch the dialer on this device.';
   static const String todaysSchedule = "Today's Schedule";
   static const String announcementDetail = 'Announcement';
   static const String eventDetail = 'Event Details';

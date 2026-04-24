@@ -82,18 +82,19 @@ class AdminTimetableScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: Text(
                         dayName,
-                        style:
-                            Theme.of(context).textTheme.labelLarge?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 1,
-                                ),
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
-                    ...items.map((item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _TimetableTile(item: item),
-                        )),
+                    ...items.map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _TimetableTile(item: item),
+                      ),
+                    ),
                   ],
                 );
               },
@@ -134,14 +135,14 @@ class _TimetableTile extends StatelessWidget {
         margin: EdgeInsets.zero,
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor:
-                theme.colorScheme.tertiary.withValues(alpha: 0.1),
+            backgroundColor: theme.colorScheme.tertiary.withValues(alpha: 0.1),
             child: Text(
               item.startTime,
               style: TextStyle(
-                  color: theme.colorScheme.tertiary,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700),
+                color: theme.colorScheme.tertiary,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           title: Text(
@@ -181,9 +182,10 @@ class _TimetableTile extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppStrings.delete,
-                style:
-                    TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              AppStrings.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),

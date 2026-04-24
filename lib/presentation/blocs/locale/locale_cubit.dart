@@ -24,8 +24,8 @@ class LocaleCubit extends ValueNotifier<Locale> {
 
   /// Convenience accessor — requires an [InheritedLocaleCubit] ancestor.
   static LocaleCubit of(BuildContext context) {
-    final inherited =
-        context.dependOnInheritedWidgetOfExactType<InheritedLocaleCubit>();
+    final inherited = context
+        .dependOnInheritedWidgetOfExactType<InheritedLocaleCubit>();
     assert(inherited != null, 'No InheritedLocaleCubit found in context');
     return inherited!.cubit;
   }

@@ -7,10 +7,7 @@ import '../../../../core/services/notification_service.dart';
 import '../../../../data/repositories/settings_repository.dart';
 import '../../../../domain/entities/timetable_item.dart';
 
-void showTodayScheduleSheet(
-  BuildContext context,
-  List<TimetableItem> classes,
-) {
+void showTodayScheduleSheet(BuildContext context, List<TimetableItem> classes) {
   final theme = Theme.of(context);
   showModalBottomSheet(
     context: context,

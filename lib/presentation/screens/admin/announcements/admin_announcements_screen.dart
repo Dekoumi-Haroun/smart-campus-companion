@@ -17,10 +17,8 @@ class AdminAnnouncementsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.manageAnnouncements)),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pushNamed(
-          context,
-          AppRoutes.adminAnnouncementForm,
-        ),
+        onPressed: () =>
+            Navigator.pushNamed(context, AppRoutes.adminAnnouncementForm),
         icon: const Icon(Icons.add),
         label: const Text('New'),
       ),
@@ -90,16 +88,15 @@ class _AnnouncementTile extends StatelessWidget {
       ),
       confirmDismiss: (_) => _confirmDelete(context),
       onDismissed: (_) {
-        context
-            .read<AnnouncementBloc>()
-            .add(DeleteAnnouncement(announcement.id));
+        context.read<AnnouncementBloc>().add(
+          DeleteAnnouncement(announcement.id),
+        );
       },
       child: Card(
         margin: EdgeInsets.zero,
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor:
-                theme.colorScheme.primary.withValues(alpha: 0.1),
+            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
             child: Text(
               announcement.category.isNotEmpty
                   ? announcement.category[0].toUpperCase()
@@ -149,8 +146,7 @@ class _AnnouncementTile extends StatelessWidget {
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(
               AppStrings.delete,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.error),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -172,22 +168,22 @@ class AdminEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon,
-              size: 64,
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.2)),
+          Icon(
+            icon,
+            size: 64,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.2),
+          ),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.4),
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.4),
+            ),
           ),
         ],
       ),

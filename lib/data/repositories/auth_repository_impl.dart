@@ -42,7 +42,10 @@ class AuthRepositoryImpl implements AuthRepository {
         _secureStorage.write(_keyToken, user.token),
         _secureStorage.write(_keyEmail, user.email),
         _secureStorage.write(_keyDisplayName, user.displayName),
-        _secureStorage.write(_keyIssuedAt, user.tokenIssuedAt.toIso8601String()),
+        _secureStorage.write(
+          _keyIssuedAt,
+          user.tokenIssuedAt.toIso8601String(),
+        ),
         _secureStorage.write(_keyIsAdmin, user.isAdmin ? '1' : '0'),
       ]);
 

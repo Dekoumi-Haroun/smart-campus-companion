@@ -65,8 +65,7 @@ class AnnouncementsPreview extends StatelessWidget {
                     final a = state.announcements[index];
                     return _AnnouncementMiniCard(
                       announcement: a,
-                      onTap: () =>
-                          showAnnouncementDetailSheet(context, a),
+                      onTap: () => showAnnouncementDetailSheet(context, a),
                     );
                   },
                 ),

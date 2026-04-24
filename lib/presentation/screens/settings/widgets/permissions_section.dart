@@ -156,8 +156,9 @@ class PermissionsSectionState extends State<PermissionsSection> {
                       height: 1,
                       indent: 16,
                       endIndent: 16,
-                      color:
-                          theme.colorScheme.onSurface.withValues(alpha: 0.06),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.06,
+                      ),
                     ),
                 ],
               ],
@@ -239,8 +240,9 @@ class _ExpandableRow extends StatelessWidget {
                       Text(
                         display.subtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                     ],
@@ -252,8 +254,7 @@ class _ExpandableRow extends StatelessWidget {
                     turns: expanded ? 0.5 : 0.0,
                     child: Icon(
                       Icons.keyboard_arrow_down_rounded,
-                      color:
-                          theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
               ],
@@ -349,14 +350,22 @@ class _ActionSpec {
 
 _ActionSpec _actionFor(FeatureStatus status) {
   return switch (status.state) {
-    FeatureState.granted =>
-      const _ActionSpec(AppStrings.revokedActiveBody, _ActionButtonKind.revoke),
-    FeatureState.revokedByApp =>
-      const _ActionSpec(AppStrings.revokedByAppBody, _ActionButtonKind.grant),
-    FeatureState.denied =>
-      const _ActionSpec(AppStrings.deniedBody, _ActionButtonKind.grant),
-    FeatureState.notRequested =>
-      const _ActionSpec(AppStrings.deniedBody, _ActionButtonKind.grant),
+    FeatureState.granted => const _ActionSpec(
+      AppStrings.revokedActiveBody,
+      _ActionButtonKind.revoke,
+    ),
+    FeatureState.revokedByApp => const _ActionSpec(
+      AppStrings.revokedByAppBody,
+      _ActionButtonKind.grant,
+    ),
+    FeatureState.denied => const _ActionSpec(
+      AppStrings.deniedBody,
+      _ActionButtonKind.grant,
+    ),
+    FeatureState.notRequested => const _ActionSpec(
+      AppStrings.deniedBody,
+      _ActionButtonKind.grant,
+    ),
     FeatureState.permanentlyDenied => const _ActionSpec(
       AppStrings.permanentlyDeniedBody,
       _ActionButtonKind.openSettings,
@@ -365,8 +374,10 @@ _ActionSpec _actionFor(FeatureStatus status) {
       AppStrings.permanentlyDeniedBody,
       _ActionButtonKind.openSettings,
     ),
-    FeatureState.auto =>
-      const _ActionSpec(AppStrings.autoBody, _ActionButtonKind.none),
+    FeatureState.auto => const _ActionSpec(
+      AppStrings.autoBody,
+      _ActionButtonKind.none,
+    ),
   };
 }
 

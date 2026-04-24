@@ -50,10 +50,12 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       } else {
         final query = event.query.toLowerCase();
         final filtered = all
-            .where((e) =>
-                e.title.toLowerCase().contains(query) ||
-                e.description.toLowerCase().contains(query) ||
-                e.location.toLowerCase().contains(query))
+            .where(
+              (e) =>
+                  e.title.toLowerCase().contains(query) ||
+                  e.description.toLowerCase().contains(query) ||
+                  e.location.toLowerCase().contains(query),
+            )
             .toList();
         emit(EventLoaded(filtered));
       }

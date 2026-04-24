@@ -537,7 +537,10 @@ class _ThemeSelector extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Icon(Icons.palette_rounded, color: theme.colorScheme.onSurface),
+                  Icon(
+                    Icons.palette_rounded,
+                    color: theme.colorScheme.onSurface,
+                  ),
                   const SizedBox(width: 16),
                   Text(
                     'Theme',

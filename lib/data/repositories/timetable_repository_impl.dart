@@ -33,7 +33,9 @@ class TimetableRepositoryImpl implements TimetableRepository {
     try {
       final jsonList = await _apiClient.getList('/timetable');
       final models = jsonList
-          .map((json) => TimetableItemModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => TimetableItemModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
       await _localDao.insertAll(models);
       await _settingsRepo?.markSynced();
@@ -58,7 +60,9 @@ class TimetableRepositoryImpl implements TimetableRepository {
     try {
       final jsonList = await _apiClient.getList('/timetable');
       final models = jsonList
-          .map((json) => TimetableItemModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => TimetableItemModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
       await _localDao.insertAll(models);
       items = models.map((m) => m.toEntity()).toList();

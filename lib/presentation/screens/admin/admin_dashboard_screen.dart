@@ -31,12 +31,14 @@ class AdminDashboardScreen extends StatelessWidget {
                     ? state.user.displayName
                     : 'Admin';
                 return Chip(
-                  avatar: const Icon(Icons.admin_panel_settings_rounded,
-                      size: 16, color: Colors.white),
+                  avatar: const Icon(
+                    Icons.admin_panel_settings_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                   label: Text(
                     name,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 12),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                   backgroundColor: theme.colorScheme.primary,
                   visualDensity: VisualDensity.compact,
@@ -58,8 +60,10 @@ class AdminDashboardScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline_rounded,
-                    color: theme.colorScheme.onPrimaryContainer),
+                Icon(
+                  Icons.info_outline_rounded,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -77,15 +81,16 @@ class AdminDashboardScreen extends StatelessWidget {
           // ── Entity Cards ──
           BlocBuilder<AnnouncementBloc, AnnouncementState>(
             builder: (context, state) {
-              final count =
-                  state is AnnouncementLoaded ? state.announcements.length : 0;
+              final count = state is AnnouncementLoaded
+                  ? state.announcements.length
+                  : 0;
               return _EntityCard(
                 icon: Icons.campaign_rounded,
                 title: 'Announcements',
                 count: count,
                 color: const Color(0xFF6C63FF),
-                onTap: () => Navigator.pushNamed(
-                    context, AppRoutes.adminAnnouncements),
+                onTap: () =>
+                    Navigator.pushNamed(context, AppRoutes.adminAnnouncements),
               );
             },
           ),
@@ -93,8 +98,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
           BlocBuilder<EventBloc, EventState>(
             builder: (context, state) {
-              final count =
-                  state is EventLoaded ? state.events.length : 0;
+              final count = state is EventLoaded ? state.events.length : 0;
               return _EntityCard(
                 icon: Icons.event_rounded,
                 title: 'Events',
@@ -109,8 +113,7 @@ class AdminDashboardScreen extends StatelessWidget {
 
           BlocBuilder<TimetableBloc, TimetableState>(
             builder: (context, state) {
-              final count =
-                  state is TimetableLoaded ? state.items.length : 0;
+              final count = state is TimetableLoaded ? state.items.length : 0;
               return _EntityCard(
                 icon: Icons.schedule_rounded,
                 title: 'Timetable',
@@ -176,7 +179,9 @@ class _EntityCard extends StatelessWidget {
                     Text(
                       '$count item${count == 1 ? '' : 's'}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     ),
                   ],

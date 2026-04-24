@@ -22,7 +22,8 @@ class _BottomActionButtonsState extends State<BottomActionButtons> {
   Widget build(BuildContext context) {
     return BlocConsumer<TimetableBloc, TimetableState>(
       listenWhen: (_, current) =>
-          current is TimetableExported || (current is TimetableError && _exporting),
+          current is TimetableExported ||
+          (current is TimetableError && _exporting),
       listener: (context, state) {
         if (state is TimetableExported) {
           setState(() => _exporting = false);
@@ -59,9 +60,9 @@ class _BottomActionButtonsState extends State<BottomActionButtons> {
                     ? null
                     : () {
                         setState(() => _exporting = true);
-                        context
-                            .read<TimetableBloc>()
-                            .add(const ExportTimetable());
+                        context.read<TimetableBloc>().add(
+                          const ExportTimetable(),
+                        );
                       },
                 icon: _exporting
                     ? const SizedBox(

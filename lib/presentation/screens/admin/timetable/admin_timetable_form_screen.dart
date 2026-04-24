@@ -121,14 +121,23 @@ class _AdminTimetableFormScreenState extends State<AdminTimetableFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _textField(_courseCtrl, AppStrings.courseNameLabel,
-                    validator: _required),
+                _textField(
+                  _courseCtrl,
+                  AppStrings.courseNameLabel,
+                  validator: _required,
+                ),
                 const SizedBox(height: 16),
-                _textField(_instructorCtrl, AppStrings.instructorLabel,
-                    validator: _required),
+                _textField(
+                  _instructorCtrl,
+                  AppStrings.instructorLabel,
+                  validator: _required,
+                ),
                 const SizedBox(height: 16),
-                _textField(_roomCtrl, AppStrings.roomLabel,
-                    validator: _required),
+                _textField(
+                  _roomCtrl,
+                  AppStrings.roomLabel,
+                  validator: _required,
+                ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
                   value: _dayOfWeek,
@@ -138,10 +147,9 @@ class _AdminTimetableFormScreenState extends State<AdminTimetableFormScreen> {
                     filled: true,
                   ),
                   items: _days
-                      .map((d) => DropdownMenuItem(
-                            value: d.$1,
-                            child: Text(d.$2),
-                          ))
+                      .map(
+                        (d) => DropdownMenuItem(value: d.$1, child: Text(d.$2)),
+                      )
                       .toList(),
                   onChanged: (v) => setState(() => _dayOfWeek = v!),
                 ),

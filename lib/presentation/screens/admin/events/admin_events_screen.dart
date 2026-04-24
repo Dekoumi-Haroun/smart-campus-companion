@@ -18,8 +18,7 @@ class AdminEventsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.manageEvents)),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () =>
-            Navigator.pushNamed(context, AppRoutes.adminEventForm),
+        onPressed: () => Navigator.pushNamed(context, AppRoutes.adminEventForm),
         icon: const Icon(Icons.add),
         label: const Text('New'),
       ),
@@ -88,16 +87,17 @@ class _EventTile extends StatelessWidget {
         child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
       confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) =>
-          context.read<EventBloc>().add(DeleteEvent(event.id)),
+      onDismissed: (_) => context.read<EventBloc>().add(DeleteEvent(event.id)),
       child: Card(
         margin: EdgeInsets.zero,
         child: ListTile(
           leading: CircleAvatar(
-            backgroundColor:
-                theme.colorScheme.secondary.withValues(alpha: 0.1),
-            child: Icon(Icons.event_rounded,
-                color: theme.colorScheme.secondary, size: 20),
+            backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.1),
+            child: Icon(
+              Icons.event_rounded,
+              color: theme.colorScheme.secondary,
+              size: 20,
+            ),
           ),
           title: Text(
             event.title,
@@ -136,9 +136,10 @@ class _EventTile extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(AppStrings.delete,
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.error)),
+            child: Text(
+              AppStrings.delete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           ),
         ],
       ),

@@ -238,7 +238,9 @@ class NotificationService {
   tz.TZDateTime _nextOccurrence(int dayOfWeek, String time) {
     final parts = time.split(':');
     if (parts.length < 2) {
-      throw FormatException('Invalid time format for notification scheduling: "$time"');
+      throw FormatException(
+        'Invalid time format for notification scheduling: "$time"',
+      );
     }
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);

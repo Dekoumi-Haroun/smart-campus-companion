@@ -373,8 +373,9 @@ class _EventCard extends StatelessWidget {
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: status == EventStatus.completed
-                                  ? theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.55)
+                                  ? theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.55,
+                                    )
                                   : null,
                             ),
                           ),

@@ -65,8 +65,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
       _revokedInApp = false;
     });
 
-    final result =
-        await (_locationService ?? const LocationService()).getCurrentPosition();
+    final result = await (_locationService ?? const LocationService())
+        .getCurrentPosition();
 
     if (!mounted) return;
 

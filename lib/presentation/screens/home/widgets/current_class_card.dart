@@ -49,8 +49,9 @@ class CurrentClassCard extends StatelessWidget {
                     ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
               final currentOrNext = _findCurrentOrNext(todayClasses);
-              final completed =
-                  todayClasses.where((c) => c.status == 'Completed').length;
+              final completed = todayClasses
+                  .where((c) => c.status == 'Completed')
+                  .length;
 
               return GestureDetector(
                 onTap: () => showTodayScheduleSheet(context, todayClasses),

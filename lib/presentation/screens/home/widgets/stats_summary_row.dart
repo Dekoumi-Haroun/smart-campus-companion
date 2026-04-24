@@ -18,8 +18,9 @@ class StatsSummaryRow extends StatelessWidget {
         Expanded(
           child: BlocBuilder<AnnouncementBloc, AnnouncementState>(
             builder: (context, state) {
-              final count =
-                  state is AnnouncementLoaded ? state.announcements.length : 0;
+              final count = state is AnnouncementLoaded
+                  ? state.announcements.length
+                  : 0;
               return _StatChip(
                 icon: Icons.campaign_rounded,
                 label: AppStrings.announcementsTitle,
@@ -99,19 +100,17 @@ class _StatChip extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               value,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 2),
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

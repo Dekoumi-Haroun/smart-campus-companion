@@ -57,8 +57,9 @@ class AnnouncementBloc extends Bloc<AnnouncementEvent, AnnouncementState> {
         emit(AnnouncementLoaded(all));
       } else {
         final filtered = all
-            .where((a) =>
-                a.category.toLowerCase() == event.category.toLowerCase())
+            .where(
+              (a) => a.category.toLowerCase() == event.category.toLowerCase(),
+            )
             .toList();
         emit(AnnouncementLoaded(filtered));
       }
@@ -79,9 +80,11 @@ class AnnouncementBloc extends Bloc<AnnouncementEvent, AnnouncementState> {
       } else {
         final query = event.query.toLowerCase();
         final filtered = all
-            .where((a) =>
-                a.title.toLowerCase().contains(query) ||
-                a.body.toLowerCase().contains(query))
+            .where(
+              (a) =>
+                  a.title.toLowerCase().contains(query) ||
+                  a.body.toLowerCase().contains(query),
+            )
             .toList();
         emit(AnnouncementLoaded(filtered));
       }
@@ -99,7 +102,12 @@ class AnnouncementBloc extends Bloc<AnnouncementEvent, AnnouncementState> {
     try {
       final created = await _repository.createAnnouncement(event.announcement);
       final current = _currentList();
-      emit(AnnouncementActionSuccess('Announcement created', [...current, created]));
+      emit(
+        AnnouncementActionSuccess('Announcement created', [
+          ...current,
+          created,
+        ]),
+      );
     } on AppException catch (e) {
       emit(AnnouncementError(e.message));
     }

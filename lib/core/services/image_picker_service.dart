@@ -94,8 +94,7 @@ sealed class PickResult {
   const factory PickResult.success(String path) = PickSuccess;
   const factory PickResult.denied({bool isPermanentlyDenied}) = PickDenied;
   const factory PickResult.cancelled() = PickCancelled;
-  const factory PickResult.revoked({required FeatureKey feature}) =
-      PickRevoked;
+  const factory PickResult.revoked({required FeatureKey feature}) = PickRevoked;
 }
 
 class PickSuccess extends PickResult {

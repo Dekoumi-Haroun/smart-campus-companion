@@ -29,12 +29,7 @@ class _AdminAnnouncementFormScreenState
 
   bool get _isEditing => widget.announcement != null;
 
-  static const _categories = [
-    'General',
-    'Academic',
-    'Sports',
-    'Urgent',
-  ];
+  static const _categories = ['General', 'Academic', 'Sports', 'Urgent'];
 
   @override
   void initState() {
@@ -45,7 +40,8 @@ class _AdminAnnouncementFormScreenState
     _sourceCtrl = TextEditingController(text: a?.source ?? '');
     _summaryCtrl = TextEditingController(text: a?.summary ?? '');
     _readTimeCtrl = TextEditingController(
-        text: a?.readTime != null ? a!.readTime.toString() : '');
+      text: a?.readTime != null ? a!.readTime.toString() : '',
+    );
     _category = a?.category ?? 'General';
   }
 
@@ -64,8 +60,7 @@ class _AdminAnnouncementFormScreenState
 
     final now = DateTime.now();
     final announcement = Announcement(
-      id: widget.announcement?.id ??
-          'admin_${now.millisecondsSinceEpoch}',
+      id: widget.announcement?.id ?? 'admin_${now.millisecondsSinceEpoch}',
       title: _titleCtrl.text.trim(),
       body: _bodyCtrl.text.trim(),
       category: _category,
@@ -76,13 +71,9 @@ class _AdminAnnouncementFormScreenState
     );
 
     if (_isEditing) {
-      context
-          .read<AnnouncementBloc>()
-          .add(UpdateAnnouncement(announcement));
+      context.read<AnnouncementBloc>().add(UpdateAnnouncement(announcement));
     } else {
-      context
-          .read<AnnouncementBloc>()
-          .add(CreateAnnouncement(announcement));
+      context.read<AnnouncementBloc>().add(CreateAnnouncement(announcement));
     }
   }
 
@@ -91,7 +82,8 @@ class _AdminAnnouncementFormScreenState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            _isEditing ? AppStrings.editAnnouncement : AppStrings.newAnnouncement),
+          _isEditing ? AppStrings.editAnnouncement : AppStrings.newAnnouncement,
+        ),
       ),
       body: BlocListener<AnnouncementBloc, AnnouncementState>(
         listenWhen: (_, curr) => curr is AnnouncementActionSuccess,
@@ -147,7 +139,9 @@ class _AdminAnnouncementFormScreenState
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     child: Text(
-                      _isEditing ? 'Update Announcement' : 'Create Announcement',
+                      _isEditing
+                          ? 'Update Announcement'
+                          : 'Create Announcement',
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),

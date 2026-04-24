@@ -90,7 +90,8 @@ class MockInterceptor extends Interceptor {
             requestOptions: options,
             statusCode: 200,
             data: {
-              'token': 'mock_admin_jwt_${DateTime.now().millisecondsSinceEpoch}',
+              'token':
+                  'mock_admin_jwt_${DateTime.now().millisecondsSinceEpoch}',
               'email': email,
               'displayName': 'Campus Admin',
               'issuedAt': DateTime.now().toIso8601String(),
@@ -167,9 +168,7 @@ class MockInterceptor extends Interceptor {
           options.data as Map<String, dynamic>? ?? {},
         );
         final list = _readRoutes[match.basePath]!;
-        final idx = list.indexWhere(
-          (e) => e['id']?.toString() == match.id,
-        );
+        final idx = list.indexWhere((e) => e['id']?.toString() == match.id);
         if (idx != -1) list[idx] = body;
         handler.resolve(
           Response(requestOptions: options, statusCode: 200, data: body),
@@ -182,8 +181,9 @@ class MockInterceptor extends Interceptor {
     if (options.method == 'DELETE') {
       final match = _matchEntityPath(options.path);
       if (match != null) {
-        _readRoutes[match.basePath]!
-            .removeWhere((e) => e['id']?.toString() == match.id);
+        _readRoutes[match.basePath]!.removeWhere(
+          (e) => e['id']?.toString() == match.id,
+        );
         handler.resolve(
           Response(requestOptions: options, statusCode: 204, data: null),
         );

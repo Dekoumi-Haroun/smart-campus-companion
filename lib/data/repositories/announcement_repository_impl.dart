@@ -30,7 +30,9 @@ class AnnouncementRepositoryImpl implements AnnouncementRepository {
     try {
       final jsonList = await _apiClient.getList('/announcements');
       final models = jsonList
-          .map((json) => AnnouncementModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => AnnouncementModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
       await _localDao.insertAll(models);
       await _settingsRepo?.markSynced();
@@ -47,7 +49,9 @@ class AnnouncementRepositoryImpl implements AnnouncementRepository {
     try {
       final jsonList = await _apiClient.getList('/announcements');
       final models = jsonList
-          .map((json) => AnnouncementModel.fromJson(json as Map<String, dynamic>))
+          .map(
+            (json) => AnnouncementModel.fromJson(json as Map<String, dynamic>),
+          )
           .toList();
       await _localDao.insertAll(models);
       await _settingsRepo?.markSynced();
