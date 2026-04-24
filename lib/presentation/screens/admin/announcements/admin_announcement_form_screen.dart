@@ -29,7 +29,10 @@ class _AdminAnnouncementFormScreenState
 
   bool get _isEditing => widget.announcement != null;
 
-  static const _categories = ['General', 'Academic', 'Sports', 'Urgent'];
+  // Mirrors the filter chips on AnnouncementsScreen — both pull from the
+  // canonical list on the domain entity so admin-created categories are
+  // always filterable.
+  static const _categories = Announcement.categories;
 
   @override
   void initState() {

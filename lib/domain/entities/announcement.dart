@@ -4,6 +4,21 @@
 /// of an announcement. The data layer's model (with JSON serialization)
 /// will map to/from this entity.
 class Announcement {
+  /// Canonical set of categories an announcement can belong to.
+  ///
+  /// Single source of truth — the announcements filter chips, the admin
+  /// form dropdown, and mock data all derive from this list. Adding a
+  /// category here automatically makes it filterable and selectable.
+  static const List<String> categories = [
+    'General',
+    'Academic',
+    'Administration',
+    'IT',
+    'Wellness',
+    'Sports',
+    'Urgent',
+  ];
+
   final String id;
   final String title;
   final String body;

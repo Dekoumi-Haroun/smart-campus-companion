@@ -26,13 +26,9 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   late final ShakeDetector _shakeDetector;
   StreamSubscription<void>? _shakeSubscription;
 
-  static const _categories = [
-    AppStrings.filterAll,
-    AppStrings.filterAcademic,
-    AppStrings.filterSports,
-    AppStrings.filterGeneral,
-    AppStrings.filterUrgent,
-  ];
+  // Filter chips = "All" + the canonical category list from the domain entity.
+  // Keeps the filter, the admin form, and mock data in sync.
+  static const _categories = [AppStrings.filterAll, ...Announcement.categories];
 
   @override
   void initState() {
@@ -207,6 +203,9 @@ class _AnnouncementCard extends StatelessWidget {
       'academic' => AppColors.tagAcademic,
       'sports' => AppColors.tagSports,
       'urgent' => AppColors.tagUrgent,
+      'administration' => AppColors.tagAdministration,
+      'it' => AppColors.tagIt,
+      'wellness' => AppColors.tagWellness,
       _ => AppColors.tagGeneral,
     };
   }
@@ -216,6 +215,9 @@ class _AnnouncementCard extends StatelessWidget {
       'academic' => Icons.school_rounded,
       'sports' => Icons.sports_rounded,
       'urgent' => Icons.warning_rounded,
+      'administration' => Icons.account_balance_rounded,
+      'it' => Icons.computer_rounded,
+      'wellness' => Icons.favorite_rounded,
       _ => Icons.info_rounded,
     };
   }
@@ -523,6 +525,9 @@ Color _categoryColorStatic(String category) {
     'academic' => AppColors.tagAcademic,
     'sports' => AppColors.tagSports,
     'urgent' => AppColors.tagUrgent,
+    'administration' => AppColors.tagAdministration,
+    'it' => AppColors.tagIt,
+    'wellness' => AppColors.tagWellness,
     _ => AppColors.tagGeneral,
   };
 }

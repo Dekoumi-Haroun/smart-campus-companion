@@ -31,7 +31,7 @@ List<Map<String, dynamic>> mockAnnouncements = [
         'this window, connectivity may be intermittent across all buildings. '
         'We recommend downloading any materials you need for offline access '
         'before Friday evening.',
-    'category': 'IT Services',
+    'category': 'IT',
     'date': '2026-04-05T14:30:00',
     'summary':
         'Scheduled Wi-Fi maintenance Saturday 2-6 AM. Download '
@@ -49,7 +49,7 @@ List<Map<String, dynamic>> mockAnnouncements = [
         'juniors on April 12, sophomores on April 14, and freshmen on '
         'April 16. Please review your degree audit before registering to '
         'ensure you are on track for graduation.',
-    'category': 'Registration',
+    'category': 'Academic',
     'date': '2026-04-04T08:00:00',
     'summary':
         'Spring 2026 registration is open. Senior priority starts '
