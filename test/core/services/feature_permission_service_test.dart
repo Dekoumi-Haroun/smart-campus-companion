@@ -38,32 +38,29 @@ void main() {
   // ────────────────────────── Bluetooth ───────────────────────────
 
   group('FeaturePermissionService.status — bluetooth', () {
-    test(
-      'OS permanent denial trumps the in-app opt-in flag '
-      '(regression: state used to flip to revokedByApp when the toggle '
-      'handler wrote enabled=false after an OS-level block)',
-      () async {
-        await settings.setBluetoothRequested(true);
-        await settings.setBluetoothEnabled(false);
+    test('OS permanent denial trumps the in-app opt-in flag '
+        '(regression: state used to flip to revokedByApp when the toggle '
+        'handler wrote enabled=false after an OS-level block)', () async {
+      await settings.setBluetoothRequested(true);
+      await settings.setBluetoothEnabled(false);
 
-        final perms = _FakePermissionService({
-          // Any one permanently-denied sub-permission folds the whole
-          // bucket to BluetoothStatus.permissionDenied.
-          Permission.bluetoothScan: PermissionStatus.permanentlyDenied,
-          Permission.bluetooth: PermissionStatus.granted,
-          Permission.bluetoothConnect: PermissionStatus.granted,
-        });
-        final service = FeaturePermissionService(
-          settings: settings,
-          permissions: perms,
-          bluetooth: BluetoothService(permissionService: perms),
-        );
+      final perms = _FakePermissionService({
+        // Any one permanently-denied sub-permission folds the whole
+        // bucket to BluetoothStatus.permissionDenied.
+        Permission.bluetoothScan: PermissionStatus.permanentlyDenied,
+        Permission.bluetooth: PermissionStatus.granted,
+        Permission.bluetoothConnect: PermissionStatus.granted,
+      });
+      final service = FeaturePermissionService(
+        settings: settings,
+        permissions: perms,
+        bluetooth: BluetoothService(permissionService: perms),
+      );
 
-        final status = await service.status(FeatureKey.bluetooth);
-        expect(status.state, FeatureState.permanentlyDenied);
-        expect(status.needsSystemSettings, isTrue);
-      },
-    );
+      final status = await service.status(FeatureKey.bluetooth);
+      expect(status.state, FeatureState.permanentlyDenied);
+      expect(status.needsSystemSettings, isTrue);
+    });
 
     test('not requested yet → notRequested (no OS block)', () async {
       final perms = _FakePermissionService({
@@ -124,24 +121,21 @@ void main() {
   // ───────────────────────── Location / Camera ────────────────────
 
   group('FeaturePermissionService.status — location', () {
-    test(
-      'OS denied + never prompted → notRequested '
-      '(regression: used to hardcode hasBeenRequested=true and surface '
-      'the alarming red "Denied" pill on a fresh install)',
-      () async {
-        final perms = _FakePermissionService({
-          Permission.location: PermissionStatus.denied,
-        });
-        final service = FeaturePermissionService(
-          settings: settings,
-          permissions: perms,
-          bluetooth: BluetoothService(permissionService: perms),
-        );
+    test('OS denied + never prompted → notRequested '
+        '(regression: used to hardcode hasBeenRequested=true and surface '
+        'the alarming red "Denied" pill on a fresh install)', () async {
+      final perms = _FakePermissionService({
+        Permission.location: PermissionStatus.denied,
+      });
+      final service = FeaturePermissionService(
+        settings: settings,
+        permissions: perms,
+        bluetooth: BluetoothService(permissionService: perms),
+      );
 
-        final status = await service.status(FeatureKey.location);
-        expect(status.state, FeatureState.notRequested);
-      },
-    );
+      final status = await service.status(FeatureKey.location);
+      expect(status.state, FeatureState.notRequested);
+    });
 
     test('OS denied + has been prompted → denied', () async {
       await settings.setLocationRequested(true);

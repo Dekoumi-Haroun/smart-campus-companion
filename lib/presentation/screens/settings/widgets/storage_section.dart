@@ -80,8 +80,7 @@ class _StorageSectionState extends State<StorageSection> {
       key: ValueKey(_refreshTick),
       future: widget.service.compute(),
       builder: (context, snapshot) {
-        final breakdown =
-            snapshot.data ?? const CacheBreakdown.empty();
+        final breakdown = snapshot.data ?? const CacheBreakdown.empty();
         return _StorageCard(
           breakdown: breakdown,
           clearing: _clearing,
@@ -150,9 +149,7 @@ class _StorageCard extends StatelessWidget {
             Wrap(
               spacing: 16,
               runSpacing: 8,
-              children: [
-                for (final s in segments) _LegendDot(segment: s),
-              ],
+              children: [for (final s in segments) _LegendDot(segment: s)],
             ),
             const SizedBox(height: 14),
 

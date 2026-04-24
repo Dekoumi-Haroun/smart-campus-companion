@@ -70,8 +70,7 @@ void main() {
     announcementBloc = _MockAnnouncementBloc();
     timetableBloc = _MockTimetableBloc();
     when(() => eventBloc.state).thenReturn(const EventInitial());
-    when(() => announcementBloc.state)
-        .thenReturn(const AnnouncementInitial());
+    when(() => announcementBloc.state).thenReturn(const AnnouncementInitial());
     when(() => timetableBloc.state).thenReturn(const TimetableInitial());
   });
 
