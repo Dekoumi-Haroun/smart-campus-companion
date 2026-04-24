@@ -156,7 +156,7 @@ class _AdminEventFormScreenState extends State<AdminEventFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _category,
+                  initialValue: _category,
                   decoration: const InputDecoration(
                     labelText: AppStrings.categoryLabel,
                     border: OutlineInputBorder(),

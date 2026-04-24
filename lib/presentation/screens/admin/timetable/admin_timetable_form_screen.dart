@@ -140,7 +140,7 @@ class _AdminTimetableFormScreenState extends State<AdminTimetableFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<int>(
-                  value: _dayOfWeek,
+                  initialValue: _dayOfWeek,
                   decoration: const InputDecoration(
                     labelText: AppStrings.dayOfWeekLabel,
                     border: OutlineInputBorder(),
@@ -169,7 +169,7 @@ class _AdminTimetableFormScreenState extends State<AdminTimetableFormScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _status,
+                  initialValue: _status,
                   decoration: const InputDecoration(
                     labelText: AppStrings.statusLabel,
                     border: OutlineInputBorder(),

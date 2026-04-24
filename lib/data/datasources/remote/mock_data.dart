@@ -104,9 +104,7 @@ List<Map<String, dynamic>> mockEvents = [
         'Hands-on workshop covering the fundamentals of machine learning '
         'with Python. Bring your laptop with Python 3.10+ installed. '
         'Beginners welcome — no prior ML experience required.',
-    "C:\Users\MAXFRAME\OneDrive\Pictures\Screenshots\Screenshot 2026-04-23 094051.png"
-            'location':
-        'Engineering Building, Room 301',
+    'location': 'Engineering Building, Room 301',
     'dateTime': '2026-04-10T10:00:00',
     'imageUrl': null,
     'endTime': '2026-04-10T12:30:00',

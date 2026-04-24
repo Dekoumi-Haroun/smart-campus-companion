@@ -176,7 +176,7 @@ class _AdminAnnouncementFormScreenState
 
   Widget _buildDropdown() {
     return DropdownButtonFormField<String>(
-      value: _category,
+      initialValue: _category,
       decoration: const InputDecoration(
         labelText: AppStrings.categoryLabel,
         border: OutlineInputBorder(),
