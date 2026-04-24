@@ -93,6 +93,9 @@ class _AnnouncementMiniCard extends StatelessWidget {
       'academic' => AppColors.tagAcademic,
       'sports' => AppColors.tagSports,
       'urgent' => AppColors.tagUrgent,
+      'administration' => AppColors.tagAdministration,
+      'it' => AppColors.tagIt,
+      'wellness' => AppColors.tagWellness,
       _ => AppColors.tagGeneral,
     };
   }
