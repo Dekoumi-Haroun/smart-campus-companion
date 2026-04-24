@@ -59,8 +59,12 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Clear the session and return to login.
   Future<void> logout() async {
-    await _authRepository.logout();
-    emit(const AuthUnauthenticated());
+    try {
+      await _authRepository.logout();
+    } finally {
+      // Always emit unauthenticated, even if secure-storage cleanup throws.
+      emit(const AuthUnauthenticated());
+    }
   }
 
   /// Called after successful biometric verification.

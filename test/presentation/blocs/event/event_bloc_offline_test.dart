@@ -21,6 +21,15 @@ class FakeEventRepository implements EventRepository {
     if (error != null) throw error!;
     return result?.where((e) => e.id == id).firstOrNull;
   }
+
+  @override
+  Future<Event> createEvent(Event e) async => e;
+
+  @override
+  Future<Event> updateEvent(Event e) async => e;
+
+  @override
+  Future<void> deleteEvent(String id) async {}
 }
 
 final _sampleEvents = [

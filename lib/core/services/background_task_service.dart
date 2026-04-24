@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:workmanager/workmanager.dart';
 
 import '../../data/datasources/local/announcement_local_dao.dart';
@@ -95,9 +96,9 @@ class BackgroundTaskService {
 
   /// Initialize workmanager. Call once at app startup.
   Future<void> init() async {
-    if (_initialized) return;
+    if (_initialized || kIsWeb) return;
 
-    await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+    await Workmanager().initialize(callbackDispatcher);
     _initialized = true;
     developer.log('BackgroundTaskService initialized', name: 'BackgroundTask');
   }
@@ -105,12 +106,12 @@ class BackgroundTaskService {
   /// Register the periodic announcement fetch task.
   /// Minimum interval on Android is 15 minutes.
   Future<void> registerPeriodicFetch() async {
+    if (kIsWeb) return;
     await Workmanager().registerPeriodicTask(
       backgroundFetchTask,
       backgroundFetchTask,
       frequency: const Duration(minutes: 15),
       constraints: Constraints(networkType: NetworkType.connected),
-
     );
     developer.log(
       'Registered periodic fetch task (15min)',
@@ -120,6 +121,7 @@ class BackgroundTaskService {
 
   /// Cancel all background tasks (called when user disables notifications).
   Future<void> cancelAll() async {
+    if (kIsWeb) return;
     await Workmanager().cancelAll();
     developer.log('Cancelled all background tasks', name: 'BackgroundTask');
   }

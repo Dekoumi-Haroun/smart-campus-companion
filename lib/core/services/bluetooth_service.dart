@@ -13,34 +13,57 @@ class BluetoothService {
     PermissionService permissionService = const PermissionService(),
   }) : _permissionService = permissionService;
 
-  /// Checks if Bluetooth permission is granted.
+  /// Permissions that gate the beacon-style Bluetooth features we'd use.
+  ///
+  /// `Permission.bluetooth` is the pre-Android-12 flag; `bluetoothScan`
+  /// and `bluetoothConnect` are the runtime prompts introduced in API 31.
+  /// On older Android versions the newer permissions simply report
+  /// granted, so requesting all three produces the right UX everywhere.
+  static const List<Permission> _btPermissions = [
+    Permission.bluetooth,
+    Permission.bluetoothScan,
+    Permission.bluetoothConnect,
+  ];
+
+  /// Checks if every required Bluetooth permission is already granted.
   ///
   /// Never throws — platform errors return [BluetoothStatus.unavailable].
   Future<BluetoothStatus> checkStatus() async {
     try {
-      final status = await _permissionService.checkStatus(Permission.bluetooth);
-      if (status.isGranted) return BluetoothStatus.available;
-      if (status.isPermanentlyDenied) return BluetoothStatus.permissionDenied;
-      return BluetoothStatus.unavailable;
+      final statuses = await Future.wait(
+        _btPermissions.map(_permissionService.checkStatus),
+      );
+      return _fold(statuses);
     } catch (_) {
       return BluetoothStatus.unavailable;
     }
   }
 
-  /// Requests Bluetooth permission and returns the resulting status.
+  /// Prompts for every required Bluetooth permission and returns the
+  /// aggregate outcome. Permissions already granted are skipped by
+  /// [PermissionService.requestPermission].
   ///
   /// Never throws — platform errors return [BluetoothStatus.unavailable].
   Future<BluetoothStatus> requestPermission() async {
     try {
-      final status = await _permissionService.requestPermission(
-        Permission.bluetooth,
-      );
-      if (status.isGranted) return BluetoothStatus.available;
-      if (status.isPermanentlyDenied) return BluetoothStatus.permissionDenied;
-      return BluetoothStatus.unavailable;
+      final statuses = <PermissionStatus>[];
+      for (final p in _btPermissions) {
+        statuses.add(await _permissionService.requestPermission(p));
+      }
+      return _fold(statuses);
     } catch (_) {
       return BluetoothStatus.unavailable;
     }
+  }
+
+  /// Reduces multiple permission statuses to a single [BluetoothStatus].
+  /// Worst-wins: permanent denial beats regular denial beats unavailable.
+  BluetoothStatus _fold(List<PermissionStatus> statuses) {
+    if (statuses.any((s) => s.isPermanentlyDenied)) {
+      return BluetoothStatus.permissionDenied;
+    }
+    if (statuses.every((s) => s.isGranted)) return BluetoothStatus.available;
+    return BluetoothStatus.unavailable;
   }
 }
 

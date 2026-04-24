@@ -8,21 +8,17 @@ import '../datasources/remote/api_client.dart';
 import '../models/auth_user_model.dart';
 
 /// Concrete implementation of [AuthRepository].
-///
-/// Handles login via API, persists session tokens in [SecureStorageService],
-/// and manages token expiry validation.
 class AuthRepositoryImpl implements AuthRepository {
   final ApiClient _apiClient;
   final SecureStorageService _secureStorage;
 
-  /// Session tokens expire after this duration.
   static const _tokenTtl = Duration(hours: 24);
 
-  // SecureStorage keys.
   static const _keyToken = 'auth_token';
   static const _keyEmail = 'auth_email';
   static const _keyDisplayName = 'auth_display_name';
   static const _keyIssuedAt = 'auth_token_issued_at';
+  static const _keyIsAdmin = 'auth_is_admin';
 
   AuthRepositoryImpl({
     required ApiClient apiClient,
@@ -42,7 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       final user = model.toEntity();
 
-      // Persist session in secure storage.
       await Future.wait([
         _secureStorage.write(_keyToken, user.token),
         _secureStorage.write(_keyEmail, user.email),
@@ -51,6 +46,7 @@ class AuthRepositoryImpl implements AuthRepository {
           _keyIssuedAt,
           user.tokenIssuedAt.toIso8601String(),
         ),
+        _secureStorage.write(_keyIsAdmin, user.isAdmin ? '1' : '0'),
       ]);
 
       return user;
@@ -73,7 +69,6 @@ class AuthRepositoryImpl implements AuthRepository {
     final issuedAt = DateTime.tryParse(issuedAtStr);
     if (issuedAt == null) return null;
 
-    // Check token expiry.
     if (DateTime.now().difference(issuedAt) > _tokenTtl) {
       await logout();
       return null;
@@ -81,12 +76,15 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final email = await _secureStorage.read(_keyEmail) ?? '';
     final displayName = await _secureStorage.read(_keyDisplayName) ?? '';
+    final isAdminStr = await _secureStorage.read(_keyIsAdmin);
+    final isAdmin = isAdminStr == '1';
 
     return AuthUser(
       email: email,
       displayName: displayName,
       token: token,
       tokenIssuedAt: issuedAt,
+      isAdmin: isAdmin,
     );
   }
 

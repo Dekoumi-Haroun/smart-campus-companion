@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -7,6 +8,7 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/widgets/permission_denied_widget.dart';
 import '../../../data/datasources/local/campus_poi_data.dart';
+import '../../../data/repositories/settings_repository.dart';
 import '../../../domain/entities/campus_poi.dart';
 
 /// Campus map screen showing user location and hardcoded POIs.
@@ -21,7 +23,7 @@ class CampusMapScreen extends StatefulWidget {
 }
 
 class _CampusMapScreenState extends State<CampusMapScreen> {
-  final LocationService _locationService = const LocationService();
+  LocationService? _locationService;
   final MapController _mapController = MapController();
 
   Position? _userPosition;
@@ -29,14 +31,24 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
   bool _permissionDenied = false;
   bool _permanentlyDenied = false;
   bool _serviceDisabled = false;
+  bool _revokedInApp = false;
 
   // Default campus center — fallback if location unavailable.
   static const _campusCenter = LatLng(36.7105, 3.1738);
 
   @override
-  void initState() {
-    super.initState();
-    _fetchLocation();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Inject the SettingsRepository lazily; didChangeDependencies gives
+    // us a valid context. The service is reconstructed on revisit so
+    // a toggle-flip in Settings takes effect the next time the map
+    // re-attaches.
+    _locationService = LocationService(
+      settings: RepositoryProvider.of<SettingsRepository>(context),
+    );
+    if (_loading && _userPosition == null && !_permissionDenied) {
+      _fetchLocation();
+    }
   }
 
   @override
@@ -50,9 +62,11 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
       _loading = true;
       _permissionDenied = false;
       _serviceDisabled = false;
+      _revokedInApp = false;
     });
 
-    final result = await _locationService.getCurrentPosition();
+    final result = await (_locationService ?? const LocationService())
+        .getCurrentPosition();
 
     if (!mounted) return;
 
@@ -71,6 +85,11 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
       case LocationServiceDisabled():
         setState(() {
           _serviceDisabled = true;
+          _loading = false;
+        });
+      case LocationRevoked():
+        setState(() {
+          _revokedInApp = true;
           _loading = false;
         });
     }
@@ -93,8 +112,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
   }
 
   void _showPoiDetail(CampusPoi poi) {
-    final distance = _userPosition != null
-        ? _locationService.getDistanceBetween(
+    final distance = (_userPosition != null && _locationService != null)
+        ? _locationService!.getDistanceBetween(
             _userPosition!.latitude,
             _userPosition!.longitude,
             poi.latitude,
@@ -185,6 +204,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
       body: _buildBody(),
       floatingActionButton:
           (!_permissionDenied &&
+              !_revokedInApp &&
               !_serviceDisabled &&
               !_loading &&
               _userPosition != null)
@@ -200,6 +220,15 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
   Widget _buildBody() {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_revokedInApp) {
+      return PermissionDeniedWidget(
+        icon: Icons.location_off_rounded,
+        message: AppStrings.locationRevokedInApp,
+        isPermanentlyDenied: false,
+        onRetry: _fetchLocation,
+      );
     }
 
     if (_permissionDenied) {

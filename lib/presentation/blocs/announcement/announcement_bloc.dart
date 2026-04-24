@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/errors/app_exceptions.dart';
+import '../../../domain/entities/announcement.dart';
 import '../../../domain/repositories/announcement_repository.dart';
 import 'announcement_event.dart';
 import 'announcement_state.dart';
@@ -15,6 +16,9 @@ class AnnouncementBloc extends Bloc<AnnouncementEvent, AnnouncementState> {
     on<RefreshAnnouncements>(_onRefresh);
     on<FilterByCategory>(_onFilterByCategory);
     on<SearchAnnouncements>(_onSearch);
+    on<CreateAnnouncement>(_onCreate);
+    on<UpdateAnnouncement>(_onUpdate);
+    on<DeleteAnnouncement>(_onDelete);
   }
 
   Future<void> _onFetch(
@@ -87,5 +91,61 @@ class AnnouncementBloc extends Bloc<AnnouncementEvent, AnnouncementState> {
     } on AppException catch (e) {
       emit(AnnouncementError(e.message));
     }
+  }
+
+  // ── Admin CRUD ──────────────────────────────────────────────────
+
+  Future<void> _onCreate(
+    CreateAnnouncement event,
+    Emitter<AnnouncementState> emit,
+  ) async {
+    try {
+      final created = await _repository.createAnnouncement(event.announcement);
+      final current = _currentList();
+      emit(
+        AnnouncementActionSuccess('Announcement created', [
+          ...current,
+          created,
+        ]),
+      );
+    } on AppException catch (e) {
+      emit(AnnouncementError(e.message));
+    }
+  }
+
+  Future<void> _onUpdate(
+    UpdateAnnouncement event,
+    Emitter<AnnouncementState> emit,
+  ) async {
+    try {
+      final updated = await _repository.updateAnnouncement(event.announcement);
+      final current = _currentList();
+      final newList = current
+          .map((a) => a.id == updated.id ? updated : a)
+          .toList();
+      emit(AnnouncementActionSuccess('Announcement updated', newList));
+    } on AppException catch (e) {
+      emit(AnnouncementError(e.message));
+    }
+  }
+
+  Future<void> _onDelete(
+    DeleteAnnouncement event,
+    Emitter<AnnouncementState> emit,
+  ) async {
+    try {
+      await _repository.deleteAnnouncement(event.announcementId);
+      final newList = _currentList()
+          .where((a) => a.id != event.announcementId)
+          .toList();
+      emit(AnnouncementActionSuccess('Announcement deleted', newList));
+    } on AppException catch (e) {
+      emit(AnnouncementError(e.message));
+    }
+  }
+
+  List<Announcement> _currentList() {
+    final s = state;
+    return s is AnnouncementLoaded ? s.announcements : [];
   }
 }

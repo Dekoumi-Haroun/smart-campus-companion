@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/entities/timetable_item.dart';
+
 sealed class TimetableEvent extends Equatable {
   const TimetableEvent();
 
@@ -7,22 +9,44 @@ sealed class TimetableEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Load the full weekly timetable.
 class FetchTimetable extends TimetableEvent {
   const FetchTimetable();
 }
 
-/// Load timetable items for a specific day (1 = Monday … 7 = Sunday).
 class FetchTimetableByDay extends TimetableEvent {
   final int day;
-
   const FetchTimetableByDay(this.day);
 
   @override
   List<Object?> get props => [day];
 }
 
-/// Export the timetable as a JSON string.
 class ExportTimetable extends TimetableEvent {
   const ExportTimetable();
+}
+
+// ── Admin CRUD ──
+
+class CreateTimetableItem extends TimetableEvent {
+  final TimetableItem item;
+  const CreateTimetableItem(this.item);
+
+  @override
+  List<Object?> get props => [item];
+}
+
+class UpdateTimetableItem extends TimetableEvent {
+  final TimetableItem item;
+  const UpdateTimetableItem(this.item);
+
+  @override
+  List<Object?> get props => [item];
+}
+
+class DeleteTimetableItem extends TimetableEvent {
+  final String itemId;
+  const DeleteTimetableItem(this.itemId);
+
+  @override
+  List<Object?> get props => [itemId];
 }

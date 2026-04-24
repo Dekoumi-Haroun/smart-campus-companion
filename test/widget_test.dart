@@ -27,9 +27,12 @@ void main() {
 
     // The app shows a loading state while checking auth status.
     // SecureStorage platform channels are unavailable in test, so the
-    // auth check doesn't complete — verify the app renders a Scaffold.
-    // Auth flow is fully covered in auth_cubit_test.dart.
-    expect(find.byType(Scaffold), findsOneWidget);
+    // auth check doesn't complete — verify the app renders the loading
+    // overlay. The overlay Scaffold now sits on top of an always-mounted
+    // Navigator (so deep links don't race the initial auth transition),
+    // which means the tree may contain more than one Scaffold; the
+    // unambiguous signal is the loading spinner itself.
+    expect(find.byType(Scaffold), findsWidgets);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 }

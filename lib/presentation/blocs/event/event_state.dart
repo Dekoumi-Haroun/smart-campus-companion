@@ -34,3 +34,16 @@ class EventError extends EventState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Emitted after a successful admin CRUD operation.
+///
+/// Extends [EventLoaded] so existing [BlocBuilder] checks continue to work.
+class EventActionSuccess extends EventLoaded {
+  final String actionMessage;
+
+  const EventActionSuccess(this.actionMessage, List<Event> events)
+    : super(events);
+
+  @override
+  List<Object?> get props => [actionMessage, events];
+}

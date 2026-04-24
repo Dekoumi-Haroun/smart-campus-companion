@@ -8,6 +8,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/services/image_picker_service.dart';
 import '../../../core/services/permission_service.dart';
+import '../../../data/repositories/settings_repository.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../domain/entities/event.dart';
 import '../../blocs/event/event_bloc.dart';
@@ -330,6 +331,7 @@ class _EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = _categoryColor(event.category);
+    final status = event.status;
 
     return Card(
       child: InkWell(
@@ -361,12 +363,26 @@ class _EventCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title
-                    Text(
-                      event.title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                    // Title + status chip
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            event.title,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: status == EventStatus.completed
+                                  ? theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.55,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _StatusPill(status: status),
+                      ],
                     ),
                     const SizedBox(height: 8),
 
@@ -536,6 +552,44 @@ class _DateBadge extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// STATUS PILL
+// ═══════════════════════════════════════════════════════════════════
+
+class _StatusPill extends StatelessWidget {
+  final EventStatus status;
+
+  const _StatusPill({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color) = switch (status) {
+      EventStatus.upcoming => (AppStrings.eventStatusUpcoming, AppColors.info),
+      EventStatus.ongoing => (AppStrings.eventStatusOngoing, AppColors.warning),
+      EventStatus.completed => (
+        AppStrings.eventStatusCompleted,
+        AppColors.success,
+      ),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // REMIND BUTTON
 // ═══════════════════════════════════════════════════════════════════
 
@@ -599,7 +653,11 @@ class _RemindButton extends StatelessWidget {
 // ═══════════════════════════════════════════════════════════════════
 
 void _showPhotoPickerSheet(BuildContext context, Event event) {
-  final imagePickerService = ImagePickerService();
+  // Inject the SettingsRepository so the picker honors the in-app
+  // "Revoke Camera Permission" toggle without the UI needing to know.
+  final imagePickerService = ImagePickerService(
+    settings: RepositoryProvider.of<SettingsRepository>(context),
+  );
 
   showModalBottomSheet(
     context: context,
@@ -689,6 +747,17 @@ void _handlePickResult(
                   onPressed: () => const PermissionService().openSettings(),
                 )
               : null,
+        ),
+      );
+    case PickRevoked():
+      // User toggled Camera off inside Settings → Permissions. Don't
+      // prompt the OS — tell them which switch actually controls the
+      // feature so they can flip it back on themselves.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(AppStrings.cameraRevokedInApp),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 5),
         ),
       );
     case PickCancelled():

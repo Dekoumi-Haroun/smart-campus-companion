@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 /// Singleton that manages the on-device SQLite database.
 ///
@@ -19,6 +21,10 @@ class LocalDatabase {
   }
 
   Future<Database> _initDatabase() async {
+    if (kIsWeb) {
+      databaseFactory = databaseFactoryFfiWeb;
+      return openDatabase('smart_campus.db', version: 1, onCreate: _onCreate);
+    }
     final dbPath = join(await getDatabasesPath(), 'smart_campus.db');
     return openDatabase(dbPath, version: 1, onCreate: _onCreate);
   }

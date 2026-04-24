@@ -1,3 +1,5 @@
+import 'package:sqflite/sqflite.dart';
+
 import '../../models/timetable_item_model.dart';
 import 'local_database.dart';
 
@@ -16,6 +18,33 @@ class TimetableLocalDao {
       batch.insert('timetable_items', item.toJson());
     }
     await batch.commit(noResult: true);
+  }
+
+  /// Inserts or replaces a single item.
+  Future<void> insertOne(TimetableItemModel item) async {
+    final db = await _localDatabase.database;
+    await db.insert(
+      'timetable_items',
+      item.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// Updates an existing item by id.
+  Future<void> updateOne(TimetableItemModel item) async {
+    final db = await _localDatabase.database;
+    await db.update(
+      'timetable_items',
+      item.toJson(),
+      where: 'id = ?',
+      whereArgs: [item.id],
+    );
+  }
+
+  /// Deletes a single item by id.
+  Future<void> deleteById(String id) async {
+    final db = await _localDatabase.database;
+    await db.delete('timetable_items', where: 'id = ?', whereArgs: [id]);
   }
 
   /// Returns every cached timetable item.

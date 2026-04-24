@@ -1,3 +1,10 @@
+/// Lifecycle of an [Event] relative to a point in time.
+///
+/// Derived — never persisted — so a single source of truth
+/// (`dateTime` / `endTime`) drives every view. If `endTime` is absent,
+/// an event is treated as one hour long for bucketing purposes.
+enum EventStatus { upcoming, ongoing, completed }
+
 /// Core Event entity — pure Dart, no Flutter dependency.
 ///
 /// Represents a campus event (workshop, sports match, lecture, etc.).
@@ -28,6 +35,27 @@ class Event {
     this.isReminded = false,
     this.photoPath,
   });
+
+  /// Returns the lifecycle bucket this event falls into, given [now].
+  ///
+  /// Using an explicit `now` keeps the entity pure and makes status
+  /// deterministic in tests. The convenience [status] getter below reads
+  /// the wall clock for day-to-day UI use.
+  EventStatus statusAt(DateTime now) {
+    if (now.isBefore(dateTime)) return EventStatus.upcoming;
+    final end = endTime ?? dateTime.add(const Duration(hours: 1));
+    if (!now.isBefore(end)) return EventStatus.completed;
+    return EventStatus.ongoing;
+  }
+
+  /// Current status against the wall clock. Prefer [statusAt] from tests.
+  EventStatus get status => statusAt(DateTime.now());
+
+  /// True when the event starts on the same calendar day as [day].
+  bool occursOn(DateTime day) =>
+      dateTime.year == day.year &&
+      dateTime.month == day.month &&
+      dateTime.day == day.day;
 
   Event copyWith({
     String? id,

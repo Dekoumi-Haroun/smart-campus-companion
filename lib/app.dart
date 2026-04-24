@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/constants/app_strings.dart';
 import 'core/constants/app_routes.dart';
@@ -29,14 +30,15 @@ import 'presentation/blocs/event/event_event.dart';
 import 'presentation/blocs/timetable/timetable_bloc.dart';
 import 'presentation/blocs/timetable/timetable_event.dart';
 import 'presentation/blocs/connectivity/connectivity_cubit.dart';
+import 'presentation/blocs/locale/locale_cubit.dart';
 import 'presentation/blocs/theme/theme_cubit.dart';
 
 /// Root widget of the SmartCampus app.
 ///
 /// Responsibilities:
-/// 1. Provide the [ThemeCubit] to the entire widget tree.
+/// 1. Provide the [ThemeCubit] and [LocaleCubit] to the entire widget tree.
 /// 2. Provide data BLoCs (Announcement, Event, Timetable) via [MultiBlocProvider].
-/// 3. Configure [MaterialApp] with theming, routing, and accessibility.
+/// 3. Configure [MaterialApp] with theming, locale, routing, and accessibility.
 /// 4. Manage [AppLifecycleObserver] for background/foreground transitions.
 /// 5. Handle notification deep linking.
 class App extends StatefulWidget {
@@ -50,6 +52,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   late final ThemeCubit _themeCubit;
+  late final LocaleCubit _localeCubit;
   final _connectivityCubit = ConnectivityCubit();
   late final SecureStorageService _secureStorageService;
   late final ApiClient _apiClient;
@@ -66,6 +69,7 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
     _themeCubit = ThemeCubit(widget.settingsRepository);
+    _localeCubit = LocaleCubit(widget.settingsRepository);
     _secureStorageService = SecureStorageService();
     _apiClient = ApiClient();
 
@@ -88,6 +92,7 @@ class _AppState extends State<App> {
       repository: AnnouncementRepositoryImpl(
         apiClient: _apiClient,
         localDao: announcementDao,
+        settingsRepository: widget.settingsRepository,
       ),
     )..add(const FetchAnnouncements());
 
@@ -95,6 +100,7 @@ class _AppState extends State<App> {
       repository: EventRepositoryImpl(
         apiClient: _apiClient,
         localDao: eventDao,
+        settingsRepository: widget.settingsRepository,
       ),
     )..add(const FetchEvents());
 
@@ -102,6 +108,7 @@ class _AppState extends State<App> {
       repository: TimetableRepositoryImpl(
         apiClient: _apiClient,
         localDao: timetableDao,
+        settingsRepository: widget.settingsRepository,
       ),
     )..add(const FetchTimetable());
 
@@ -145,6 +152,7 @@ class _AppState extends State<App> {
     _eventBloc.close();
     _timetableBloc.close();
     _themeCubit.dispose();
+    _localeCubit.dispose();
     NotificationService.instance.onNotificationTap = null;
     super.dispose();
   }
@@ -166,55 +174,100 @@ class _AppState extends State<App> {
         ],
         child: InheritedThemeCubit(
           cubit: _themeCubit,
-          child: ValueListenableBuilder<ThemeMode>(
-            valueListenable: _themeCubit,
-            builder: (context, themeMode, _) {
-              return BlocBuilder<AuthCubit, AuthState>(
-                builder: (context, authState) {
-                  // Show loading splash while checking stored session.
-                  if (authState is AuthUnknown) {
+          child: InheritedLocaleCubit(
+            cubit: _localeCubit,
+            child: ValueListenableBuilder<ThemeMode>(
+              valueListenable: _themeCubit,
+              builder: (context, themeMode, _) {
+                return ValueListenableBuilder<Locale>(
+                  valueListenable: _localeCubit,
+                  builder: (context, locale, _) {
                     return MaterialApp(
+                      // ── Identity ──
                       title: AppStrings.appName,
                       debugShowCheckedModeBanner: false,
+
+                      // ── Theming ──
                       theme: AppTheme.light,
                       darkTheme: AppTheme.dark,
                       themeMode: themeMode,
-                      home: const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      ),
+
+                      // ── Locale ──
+                      locale: locale,
+                      supportedLocales: const [
+                        Locale('en'),
+                        Locale('fr'),
+                        Locale('ar'),
+                      ],
+                      localizationsDelegates: const [
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                        GlobalCupertinoLocalizations.delegate,
+                      ],
+
+                      // ── Routing ──
+                      navigatorKey: _navigatorKey,
+                      // Start on login; BlocConsumer.listener below
+                      // navigates to the correct screen once auth resolves.
+                      initialRoute: AppRoutes.login,
+                      onGenerateRoute: AppRouter.generateRoute,
+
+                      // ── Auth-driven navigation ──
+                      // A BlocConsumer inside MaterialApp.builder navigates
+                      // imperatively via _navigatorKey instead of recreating
+                      // MaterialApp with a new key. The key-swap approach has
+                      // a GlobalKey bug: Flutter preserves the old Navigator's
+                      // route stack when the same navigatorKey is reused across
+                      // MaterialApp instances, so initialRoute is never applied
+                      // and the home screen persists after logout.
+                      builder: (context, child) {
+                        return BlocConsumer<AuthCubit, AuthState>(
+                          listener: (context, state) {
+                            final navigator = _navigatorKey.currentState;
+                            if (navigator == null) return;
+                            if (state is AuthAuthenticated) {
+                              navigator.pushNamedAndRemoveUntil(
+                                AppRoutes.home,
+                                (_) => false,
+                              );
+                            } else if (state is AuthUnauthenticated) {
+                              navigator.pushNamedAndRemoveUntil(
+                                AppRoutes.login,
+                                (_) => false,
+                              );
+                            } else if (state is AuthBiometricRequired) {
+                              navigator.pushNamedAndRemoveUntil(
+                                AppRoutes.biometricPrompt,
+                                (_) => false,
+                              );
+                            }
+                          },
+                          builder: (context, state) {
+                            // Always keep child (the Navigator) in the tree so
+                            // _navigatorKey.currentState is never null when the
+                            // listener fires, including the initial
+                            // AuthUnknown → AuthAuthenticated transition.
+                            return Stack(
+                              children: [
+                                child ?? const SizedBox.shrink(),
+                                if (state is AuthUnknown)
+                                  Positioned.fill(
+                                    child: Scaffold(
+                                      body: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        );
+                      },
                     );
-                  }
-
-                  final String initialRoute;
-                  if (authState is AuthAuthenticated) {
-                    initialRoute = AppRoutes.home;
-                  } else if (authState is AuthBiometricRequired) {
-                    initialRoute = AppRoutes.biometricPrompt;
-                  } else {
-                    initialRoute = AppRoutes.login;
-                  }
-
-                  return MaterialApp(
-                    // Force rebuild when auth state changes route.
-                    key: ValueKey(initialRoute),
-
-                    // ── Identity ──
-                    title: AppStrings.appName,
-                    debugShowCheckedModeBanner: false,
-
-                    // ── Theming ──
-                    theme: AppTheme.light,
-                    darkTheme: AppTheme.dark,
-                    themeMode: themeMode,
-
-                    // ── Routing ──
-                    navigatorKey: _navigatorKey,
-                    initialRoute: initialRoute,
-                    onGenerateRoute: AppRouter.generateRoute,
-                  );
-                },
-              );
-            },
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),

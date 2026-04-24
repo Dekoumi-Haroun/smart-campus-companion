@@ -1,14 +1,25 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:smart_campus/core/constants/app_strings.dart';
 import 'package:smart_campus/data/repositories/settings_repository.dart';
 import 'package:smart_campus/domain/entities/auth_user.dart';
 import 'package:smart_campus/domain/repositories/auth_repository.dart';
+import 'package:smart_campus/presentation/blocs/announcement/announcement_bloc.dart';
+import 'package:smart_campus/presentation/blocs/announcement/announcement_event.dart';
+import 'package:smart_campus/presentation/blocs/announcement/announcement_state.dart';
 import 'package:smart_campus/presentation/blocs/auth/auth_cubit.dart';
+import 'package:smart_campus/presentation/blocs/event/event_bloc.dart';
+import 'package:smart_campus/presentation/blocs/event/event_event.dart';
+import 'package:smart_campus/presentation/blocs/event/event_state.dart';
 import 'package:smart_campus/presentation/blocs/theme/theme_cubit.dart';
+import 'package:smart_campus/presentation/blocs/timetable/timetable_bloc.dart';
+import 'package:smart_campus/presentation/blocs/timetable/timetable_event.dart';
+import 'package:smart_campus/presentation/blocs/timetable/timetable_state.dart';
 import 'package:smart_campus/presentation/screens/settings/settings_screen.dart';
 
 class FakeAuthRepository implements AuthRepository {
@@ -23,10 +34,27 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> logout() async {}
 }
 
+// SettingsScreen reads EventBloc inside didChangeDependencies (for its
+// CacheMetricsService photoPathsProvider), and dispatches to all three
+// content blocs from the Clear Cache flow. We stub them with MockBloc
+// so the widget tree resolves without touching the real repositories.
+class _MockEventBloc extends MockBloc<EventEvent, EventState>
+    implements EventBloc {}
+
+class _MockAnnouncementBloc
+    extends MockBloc<AnnouncementEvent, AnnouncementState>
+    implements AnnouncementBloc {}
+
+class _MockTimetableBloc extends MockBloc<TimetableEvent, TimetableState>
+    implements TimetableBloc {}
+
 void main() {
   late SettingsRepository settingsRepo;
   late ThemeCubit themeCubit;
   late AuthCubit authCubit;
+  late _MockEventBloc eventBloc;
+  late _MockAnnouncementBloc announcementBloc;
+  late _MockTimetableBloc timetableBloc;
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -37,6 +65,13 @@ void main() {
       authRepository: FakeAuthRepository(),
       settingsRepository: settingsRepo,
     );
+
+    eventBloc = _MockEventBloc();
+    announcementBloc = _MockAnnouncementBloc();
+    timetableBloc = _MockTimetableBloc();
+    when(() => eventBloc.state).thenReturn(const EventInitial());
+    when(() => announcementBloc.state).thenReturn(const AnnouncementInitial());
+    when(() => timetableBloc.state).thenReturn(const TimetableInitial());
   });
 
   tearDown(() {
@@ -45,8 +80,13 @@ void main() {
   });
 
   Widget buildSettingsScreen() {
-    return BlocProvider.value(
-      value: authCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>.value(value: authCubit),
+        BlocProvider<EventBloc>.value(value: eventBloc),
+        BlocProvider<AnnouncementBloc>.value(value: announcementBloc),
+        BlocProvider<TimetableBloc>.value(value: timetableBloc),
+      ],
       child: RepositoryProvider.value(
         value: settingsRepo,
         child: InheritedThemeCubit(

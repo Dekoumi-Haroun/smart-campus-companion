@@ -2,18 +2,28 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart'
     show Permission, PermissionStatus, PermissionStatusGetters;
 
+import '../../data/repositories/settings_repository.dart';
+import 'feature_permission_service.dart';
 import 'permission_service.dart';
 
 /// Wraps [Geolocator] with permission checks via [PermissionService].
 ///
 /// Provides current position, distance calculations, and
 /// GPS-enabled checks. Returns `null` when location is denied.
+///
+/// An optional [SettingsRepository] lets the service honor the in-app
+/// "Revoke Location Permission" toggle: when the flag is set, the call
+/// short-circuits with [LocationRevoked] instead of prompting the OS,
+/// matching the image picker's Camera gate.
 class LocationService {
   final PermissionService _permissionService;
+  final SettingsRepository? _settings;
 
   const LocationService({
     PermissionService permissionService = const PermissionService(),
-  }) : _permissionService = permissionService;
+    SettingsRepository? settings,
+  }) : _permissionService = permissionService,
+       _settings = settings;
 
   /// Requests location permission and returns the current position.
   ///
@@ -21,6 +31,9 @@ class LocationService {
   /// permission errors) are caught and returned as the appropriate
   /// [LocationResult] variant.
   Future<LocationResult> getCurrentPosition() async {
+    if (_settings?.getLocationRevoked() ?? false) {
+      return const LocationResult.revoked(feature: FeatureKey.location);
+    }
     try {
       // Check if location services are enabled.
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -83,6 +96,8 @@ sealed class LocationResult {
   const factory LocationResult.denied({bool isPermanentlyDenied}) =
       LocationDenied;
   const factory LocationResult.serviceDisabled() = LocationServiceDisabled;
+  const factory LocationResult.revoked({required FeatureKey feature}) =
+      LocationRevoked;
 }
 
 class LocationSuccess extends LocationResult {
@@ -97,4 +112,11 @@ class LocationDenied extends LocationResult {
 
 class LocationServiceDisabled extends LocationResult {
   const LocationServiceDisabled();
+}
+
+/// User revoked the in-app Location toggle. Callers should route the
+/// user to Settings → Permissions instead of prompting the OS.
+class LocationRevoked extends LocationResult {
+  final FeatureKey feature;
+  const LocationRevoked({required this.feature});
 }

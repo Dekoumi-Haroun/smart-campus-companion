@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/errors/app_exceptions.dart';
+import '../../../domain/entities/event.dart';
 import '../../../domain/repositories/event_repository.dart';
 import 'event_event.dart';
 import 'event_state.dart';
@@ -16,6 +17,9 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<SearchEvents>(_onSearch);
     on<ToggleReminder>(_onToggleReminder);
     on<AttachPhoto>(_onAttachPhoto);
+    on<CreateEvent>(_onCreate);
+    on<UpdateEvent>(_onUpdate);
+    on<DeleteEvent>(_onDelete);
   }
 
   Future<void> _onFetch(FetchEvents event, Emitter<EventState> emit) async {
@@ -68,9 +72,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     if (currentState is! EventLoaded) return;
 
     final updatedEvents = currentState.events.map((e) {
-      if (e.id == event.eventId) {
-        return e.copyWith(isReminded: !e.isReminded);
-      }
+      if (e.id == event.eventId) return e.copyWith(isReminded: !e.isReminded);
       return e;
     }).toList();
 
@@ -82,12 +84,50 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     if (currentState is! EventLoaded) return;
 
     final updatedEvents = currentState.events.map((e) {
-      if (e.id == event.eventId) {
-        return e.copyWith(photoPath: event.photoPath);
-      }
+      if (e.id == event.eventId) return e.copyWith(photoPath: event.photoPath);
       return e;
     }).toList();
 
     emit(EventLoaded(updatedEvents));
+  }
+
+  // ── Admin CRUD ──────────────────────────────────────────────────
+
+  Future<void> _onCreate(CreateEvent event, Emitter<EventState> emit) async {
+    try {
+      final created = await _repository.createEvent(event.event);
+      emit(EventActionSuccess('Event created', [..._currentList(), created]));
+    } on AppException catch (e) {
+      emit(EventError(e.message));
+    }
+  }
+
+  Future<void> _onUpdate(UpdateEvent event, Emitter<EventState> emit) async {
+    try {
+      final updated = await _repository.updateEvent(event.event);
+      final newList = _currentList()
+          .map((e) => e.id == updated.id ? updated : e)
+          .toList();
+      emit(EventActionSuccess('Event updated', newList));
+    } on AppException catch (e) {
+      emit(EventError(e.message));
+    }
+  }
+
+  Future<void> _onDelete(DeleteEvent event, Emitter<EventState> emit) async {
+    try {
+      await _repository.deleteEvent(event.eventId);
+      final newList = _currentList()
+          .where((e) => e.id != event.eventId)
+          .toList();
+      emit(EventActionSuccess('Event deleted', newList));
+    } on AppException catch (e) {
+      emit(EventError(e.message));
+    }
+  }
+
+  List<Event> _currentList() {
+    final s = state;
+    return s is EventLoaded ? s.events : [];
   }
 }
