@@ -20,13 +20,27 @@ class LocalDatabase {
     return _database!;
   }
 
+  // v2: adds an `isLocal` flag to each cache table so server sync
+  // (insertAll) can leave admin-created/edited rows untouched.
+  static const int _schemaVersion = 2;
+
   Future<Database> _initDatabase() async {
     if (kIsWeb) {
       databaseFactory = databaseFactoryFfiWeb;
-      return openDatabase('smart_campus.db', version: 1, onCreate: _onCreate);
+      return openDatabase(
+        'smart_campus.db',
+        version: _schemaVersion,
+        onCreate: _onCreate,
+        onUpgrade: _onUpgrade,
+      );
     }
     final dbPath = join(await getDatabasesPath(), 'smart_campus.db');
-    return openDatabase(dbPath, version: 1, onCreate: _onCreate);
+    return openDatabase(
+      dbPath,
+      version: _schemaVersion,
+      onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -40,7 +54,8 @@ class LocalDatabase {
         source TEXT,
         date TEXT,
         readTime INTEGER,
-        isBookmarked INTEGER
+        isBookmarked INTEGER,
+        isLocal INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -55,7 +70,8 @@ class LocalDatabase {
         endTime TEXT,
         category TEXT,
         attendeeCount INTEGER,
-        isReminded INTEGER
+        isReminded INTEGER,
+        isLocal INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -68,8 +84,27 @@ class LocalDatabase {
         dayOfWeek INTEGER,
         startTime TEXT,
         endTime TEXT,
-        status TEXT
+        status TEXT,
+        isLocal INTEGER NOT NULL DEFAULT 0
       )
     ''');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Existing rows are server-origin by definition — default 0.
+      await db.execute(
+        'ALTER TABLE announcements '
+        'ADD COLUMN isLocal INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE events '
+        'ADD COLUMN isLocal INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE timetable_items '
+        'ADD COLUMN isLocal INTEGER NOT NULL DEFAULT 0',
+      );
+    }
   }
 }

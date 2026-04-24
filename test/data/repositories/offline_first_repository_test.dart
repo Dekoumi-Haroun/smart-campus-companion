@@ -8,9 +8,15 @@ import 'package:smart_campus/data/datasources/local/event_local_dao.dart';
 import 'package:smart_campus/data/datasources/local/local_database.dart';
 import 'package:smart_campus/data/datasources/local/timetable_local_dao.dart';
 import 'package:smart_campus/data/datasources/remote/api_client.dart';
+import 'package:smart_campus/data/models/announcement_model.dart';
+import 'package:smart_campus/data/models/event_model.dart';
+import 'package:smart_campus/data/models/timetable_item_model.dart';
 import 'package:smart_campus/data/repositories/announcement_repository_impl.dart';
 import 'package:smart_campus/data/repositories/event_repository_impl.dart';
 import 'package:smart_campus/data/repositories/timetable_repository_impl.dart';
+import 'package:smart_campus/domain/entities/announcement.dart';
+import 'package:smart_campus/domain/entities/event.dart';
+import 'package:smart_campus/domain/entities/timetable_item.dart';
 
 // ---------------------------------------------------------------------------
 // Fake ApiClient that simulates network success/failure
@@ -234,6 +240,139 @@ void main() {
         fakeApi.shouldFail = true;
 
         expect(() => repo.getTimetableByDay(1), throwsA(isA<CacheException>()));
+      },
+    );
+  });
+
+  // =========================================================================
+  // Admin writes survive server sync (regression for the
+  // "admin-created entity vanishes on app restart" bug)
+  // =========================================================================
+  group('Admin writes survive server sync', () {
+    test(
+      'AnnouncementLocalDao: admin-created row survives subsequent insertAll',
+      () async {
+        final dao = AnnouncementLocalDao(localDb);
+
+        // Simulate first app launch: server returns mock announcements.
+        await dao.insertAll([
+          AnnouncementModel.fromJson(_announcementJson.first),
+        ]);
+
+        // Admin creates a local announcement.
+        final adminAnnouncement = AnnouncementModel.fromEntity(
+          Announcement(
+            id: 'admin_1',
+            title: 'Admin Post',
+            body: 'Local only',
+            category: 'Academic',
+            date: DateTime(2026, 4, 24),
+          ),
+        );
+        await dao.insertOne(adminAnnouncement);
+
+        // Simulate app restart: server sync runs again with the same mocks.
+        await dao.insertAll([
+          AnnouncementModel.fromJson(_announcementJson.first),
+        ]);
+
+        final cached = await dao.getAll();
+        expect(cached.length, 2);
+        expect(cached.any((a) => a.id == 'admin_1'), isTrue);
+        expect(cached.any((a) => a.id == '1'), isTrue);
+      },
+    );
+
+    test(
+      'EventLocalDao: admin-created row survives subsequent insertAll',
+      () async {
+        final dao = EventLocalDao(localDb);
+
+        await dao.insertAll([EventModel.fromJson(_eventJson.first)]);
+
+        final adminEvent = EventModel.fromEntity(
+          Event(
+            id: 'admin_e1',
+            title: 'Admin Event',
+            description: 'Local only',
+            location: 'Test Hall',
+            dateTime: DateTime(2026, 5, 1),
+            category: 'Workshop',
+          ),
+        );
+        await dao.insertOne(adminEvent);
+
+        await dao.insertAll([EventModel.fromJson(_eventJson.first)]);
+
+        final cached = await dao.getAll();
+        expect(cached.length, 2);
+        expect(cached.any((e) => e.id == 'admin_e1'), isTrue);
+      },
+    );
+
+    test(
+      'TimetableLocalDao: admin-created row survives subsequent insertAll',
+      () async {
+        final dao = TimetableLocalDao(localDb);
+
+        await dao.insertAll([
+          TimetableItemModel.fromJson(_timetableJson.first),
+        ]);
+
+        final adminItem = TimetableItemModel.fromEntity(
+          const TimetableItem(
+            id: 'admin_t1',
+            courseName: 'Admin Course',
+            instructor: 'Admin',
+            room: 'X-100',
+            dayOfWeek: 3,
+            startTime: '14:00',
+            endTime: '15:30',
+            status: 'Upcoming',
+          ),
+        );
+        await dao.insertOne(adminItem);
+
+        await dao.insertAll([
+          TimetableItemModel.fromJson(_timetableJson.first),
+        ]);
+
+        final cached = await dao.getAll();
+        expect(cached.length, 2);
+        expect(cached.any((t) => t.id == 'admin_t1'), isTrue);
+      },
+    );
+
+    test(
+      'AnnouncementLocalDao: admin-edited row survives subsequent insertAll',
+      () async {
+        final dao = AnnouncementLocalDao(localDb);
+
+        // Seed a server row.
+        await dao.insertAll([
+          AnnouncementModel.fromJson(_announcementJson.first),
+        ]);
+
+        // Admin edits the title. updateOne should pin it as local.
+        final edited = AnnouncementModel.fromEntity(
+          Announcement(
+            id: '1',
+            title: 'Edited Title',
+            body: 'Stay safe',
+            category: 'Urgent',
+            date: DateTime(2026, 4, 1),
+          ),
+        );
+        await dao.updateOne(edited);
+
+        // Re-sync with the original server payload.
+        await dao.insertAll([
+          AnnouncementModel.fromJson(_announcementJson.first),
+        ]);
+
+        final cached = await dao.getAll();
+        expect(cached.length, 1);
+        expect(cached.first.title, 'Edited Title');
       },
     );
   });
