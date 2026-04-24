@@ -22,6 +22,15 @@ class FakeTimetableRepository implements TimetableRepository {
 
   @override
   Future<List<TimetableItem>> getTimetableByDay(int dayOfWeek) async => [];
+
+  @override
+  Future<TimetableItem> createTimetableItem(TimetableItem item) async => item;
+
+  @override
+  Future<TimetableItem> updateTimetableItem(TimetableItem item) async => item;
+
+  @override
+  Future<void> deleteTimetableItem(String id) async {}
 }
 
 void main() {

@@ -36,6 +36,17 @@ class AppStrings {
   static const String exportSchedule = 'Export Schedule';
   static const String campusSafety = 'Campus Safety';
   static const String campusSafetyComingSoon = 'Coming in Sprint 4';
+
+  // ── Campus Safety Sheet ──
+  static const String safetyContactSecurity = 'Security';
+  static const String safetyContactMedical = 'Medical';
+  static const String safetyContactFire = 'Fire';
+  static const String safetyNumberSecurity = '041-XXX-XXX';
+  static const String safetyNumberMedical = '041-XXX-XXX';
+  static const String safetyNumberFire = '14';
+  static const String callSecurityNow = 'Call Security Now';
+  static const String close = 'Close';
+  static const String callFailedMessage = 'Could not launch the dialer on this device.';
   static const String todaysSchedule = "Today's Schedule";
   static const String announcementDetail = 'Announcement';
   static const String eventDetail = 'Event Details';
@@ -67,6 +78,9 @@ class AppStrings {
   // ── Events Screen ──
   static const String eventsTitle = 'Events';
   static const String noEvents = 'No upcoming events';
+  static const String eventStatusUpcoming = 'Upcoming';
+  static const String eventStatusOngoing = 'Ongoing';
+  static const String eventStatusCompleted = 'Completed';
   static const String searchEvents = 'Search events...';
   static const String going = 'going';
   static const String reminded = 'Reminded';
@@ -121,8 +135,79 @@ class AppStrings {
   static const String bluetooth = 'Bluetooth';
   static const String bluetoothAvailable = 'Available';
   static const String bluetoothUnavailable = 'Unavailable';
+  static const String bluetoothEnabledSubtitle =
+      'Use campus beacons & indoor hints';
+  static const String bluetoothActivated = 'Activated — campus beacons ready';
+  static const String bluetoothDeactivated = 'Deactivated';
+  static const String bluetoothDeniedBody =
+      'Bluetooth permission was denied, so campus-beacon features stay off. '
+      'You can grant it from your device settings and try again.';
   static const String nfc = 'NFC';
   static const String nfcConceptual = 'Conceptual';
+
+  // ── Storage & Data (Settings) ──
+  static const String storageAndData = 'Storage & Data';
+  static const String cacheAnnouncements = 'Announcements';
+  static const String cacheEvents = 'Events';
+  static const String cacheTimetable = 'Timetable';
+  static const String cacheImages = 'Images';
+  static const String clearCache = 'Clear Cache';
+  static const String clearCacheConfirmTitle = 'Clear cached data?';
+  static const String clearCacheConfirmMessage =
+      'This removes downloaded announcements, events, timetable, and attached '
+      'photos from this device. The next time you open those screens the app '
+      'will refetch them.';
+  static const String cacheCleared = 'Cache cleared';
+  static const String totalCached = 'Total:';
+  static const String ofCachedData = 'of cached data';
+  static const String lastSynced = 'Last synced:';
+
+  // ── Permissions summary (Settings) ──
+  static const String permissionsSection = 'Permissions';
+  static const String permLocationLabel = 'Location';
+  static const String permLocationSubtitle = 'Used for campus map navigation';
+  static const String permCameraLabel = 'Camera';
+  static const String permCameraSubtitle = 'Attach photos to event notes';
+  static const String permNotificationsLabel = 'Notifications';
+  static const String permNotificationsSubtitle = 'Class reminders & alerts';
+  static const String permSensorsLabel = 'Sensors';
+  static const String permSensorsSubtitle = 'Shake to refresh (accelerometer)';
+  static const String permBluetoothLabel = 'Bluetooth';
+  static const String permBluetoothSubtitle = 'Campus check-in (future)';
+  static const String permStatusGranted = 'Granted';
+  static const String permStatusDenied = 'Denied';
+  static const String permStatusNotRequested = 'Not Requested';
+  static const String permStatusPermanentlyDenied = 'Blocked';
+  static const String permStatusRestricted = 'Restricted';
+  static const String permStatusAuto = 'Auto';
+  static const String permStatusRevokedInApp = 'Revoked';
+
+  // ── Permission row actions (expanded state) ──
+  static const String grantPermission = 'Grant Permission';
+  static const String revokePermission = 'Revoke Permission';
+  static const String revokedActiveBody =
+      'This permission is currently active. You can revoke it to disable this '
+      'feature.';
+  static const String revokedByAppBody =
+      'You revoked this feature in-app. Grant it again to use it.';
+  static const String deniedBody =
+      'This permission is not granted yet. Tap the button below to request it.';
+  static const String permanentlyDeniedBody =
+      'This permission was permanently denied. Grant it from your device '
+      'settings, then return here.';
+  static const String autoBody =
+      'No runtime permission is required for this feature.';
+  static const String cameraRevokedInApp =
+      'Camera is disabled in Settings → Permissions. Re-enable it there to '
+      'attach photos again.';
+  static const String locationRevokedInApp =
+      'Location is disabled in Settings → Permissions. Re-enable it there to '
+      'use the campus map.';
+  static const String openAppPermissions = 'Open Permissions';
+  static const String actionRevoked = 'Permission revoked';
+  static const String actionGranted = 'Permission granted';
+  static const String actionOsDenied =
+      'The system permission prompt was denied.';
   static const String bluetoothDescription =
       'Bluetooth could be used for campus beacon-based attendance tracking, '
       'indoor navigation, and proximity alerts near lecture halls.';
@@ -182,4 +267,46 @@ class AppStrings {
   static const String pageNotFoundMessage =
       'The page you\'re looking for doesn\'t exist.';
   static const String goHome = 'Go Home';
+
+  // ── Admin ──
+  static const String adminPanel = 'Admin Panel';
+  static const String adminDashboard = 'Dashboard';
+  static const String adminBadge = 'ADMIN';
+  static const String manageAnnouncements = 'Manage Announcements';
+  static const String manageEvents = 'Manage Events';
+  static const String manageTimetable = 'Manage Timetable';
+  static const String newAnnouncement = 'New Announcement';
+  static const String newEvent = 'New Event';
+  static const String newClass = 'New Class';
+  static const String editAnnouncement = 'Edit Announcement';
+  static const String editEvent = 'Edit Event';
+  static const String editClass = 'Edit Class';
+  static const String deleteConfirmTitle = 'Delete Item';
+  static const String deleteConfirmMessage =
+      'This action cannot be undone. Are you sure?';
+  static const String delete = 'Delete';
+  static const String titleLabel = 'Title';
+  static const String bodyLabel = 'Content';
+  static const String categoryLabel = 'Category';
+  static const String sourceLabel = 'Source';
+  static const String summaryLabel = 'Summary';
+  static const String readTimeLabel = 'Read time (minutes)';
+  static const String locationLabel = 'Location';
+  static const String descriptionLabel = 'Description';
+  static const String dateLabel = 'Date & Time';
+  static const String endDateLabel = 'End Time (optional)';
+  static const String attendeeCountLabel = 'Attendee count';
+  static const String courseNameLabel = 'Course Name';
+  static const String instructorLabel = 'Instructor';
+  static const String roomLabel = 'Room';
+  static const String dayOfWeekLabel = 'Day';
+  static const String startTimeLabel = 'Start Time (HH:MM)';
+  static const String endTimeLabel = 'End Time (HH:MM)';
+  static const String statusLabel = 'Status';
+  static const String fieldRequired = 'This field is required';
+  static const String invalidTimeFormat = 'Use HH:MM format (e.g. 09:30)';
+  static const String adminCredentials =
+      'Admin: admin@smartcampus.dev / admin123';
+  static const String accessDenied =
+      'Access denied. Admin privileges required.';
 }

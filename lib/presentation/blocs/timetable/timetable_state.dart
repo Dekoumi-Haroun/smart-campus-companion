@@ -43,3 +43,16 @@ class TimetableError extends TimetableState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Emitted after a successful admin CRUD operation.
+///
+/// Extends [TimetableLoaded] so existing [BlocBuilder] checks continue to work.
+class TimetableActionSuccess extends TimetableLoaded {
+  final String actionMessage;
+
+  const TimetableActionSuccess(this.actionMessage, List<TimetableItem> items)
+    : super(items);
+
+  @override
+  List<Object?> get props => [actionMessage, items];
+}

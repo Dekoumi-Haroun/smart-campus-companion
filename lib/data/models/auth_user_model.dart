@@ -1,23 +1,21 @@
 import '../../domain/entities/auth_user.dart';
 
 /// Data Transfer Object for [AuthUser].
-///
-/// Handles JSON serialization/deserialization for the auth API response
-/// and SecureStorage persistence.
 class AuthUserModel {
   final String email;
   final String displayName;
   final String token;
   final DateTime tokenIssuedAt;
+  final bool isAdmin;
 
   const AuthUserModel({
     required this.email,
     required this.displayName,
     required this.token,
     required this.tokenIssuedAt,
+    this.isAdmin = false,
   });
 
-  /// Parse from JSON map (API response).
   factory AuthUserModel.fromJson(Map<String, dynamic> json) {
     return AuthUserModel(
       email: json['email']?.toString() ?? '',
@@ -26,16 +24,17 @@ class AuthUserModel {
       tokenIssuedAt:
           DateTime.tryParse(json['issuedAt']?.toString() ?? '') ??
           DateTime.now(),
+      isAdmin: json['isAdmin'] == true,
     );
   }
 
-  /// Convert to domain entity.
   AuthUser toEntity() {
     return AuthUser(
       email: email,
       displayName: displayName,
       token: token,
       tokenIssuedAt: tokenIssuedAt,
+      isAdmin: isAdmin,
     );
   }
 }

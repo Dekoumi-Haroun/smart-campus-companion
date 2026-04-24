@@ -3,7 +3,7 @@
 // Used by MockInterceptor to simulate API responses during development.
 // Each list mirrors the fields expected by the corresponding data model.
 
-const List<Map<String, dynamic>> mockAnnouncements = [
+List<Map<String, dynamic>> mockAnnouncements = [
   {
     'id': '1',
     'title': 'Campus Library Extended Hours',
@@ -96,14 +96,14 @@ const List<Map<String, dynamic>> mockAnnouncements = [
   },
 ];
 
-const List<Map<String, dynamic>> mockEvents = [
+List<Map<String, dynamic>> mockEvents = [
   {
     'id': '1',
     'title': 'AI & Machine Learning Workshop',
     'description':
         'Hands-on workshop covering the fundamentals of machine learning '
         'with Python. Bring your laptop with Python 3.10+ installed. '
-        'Beginners welcome — no prior ML experience required.',
+        'Beginners welcome — no prior ML experience required.',"C:\Users\MAXFRAME\OneDrive\Pictures\Screenshots\Screenshot 2026-04-23 094051.png"
     'location': 'Engineering Building, Room 301',
     'dateTime': '2026-04-10T10:00:00',
     'imageUrl': null,
@@ -176,7 +176,7 @@ const List<Map<String, dynamic>> mockEvents = [
   },
 ];
 
-const List<Map<String, dynamic>> mockTimetable = [
+List<Map<String, dynamic>> mockTimetable = [
   {
     'id': '1',
     'courseName': 'Mobile Application Development',

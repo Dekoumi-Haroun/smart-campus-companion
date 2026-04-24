@@ -8,25 +8,13 @@ import 'mock_data.dart';
 // ══════════════════════════════════════════════════════════════════
 // OWASP Mobile Security Considerations:
 // 1. HTTPS Only: BaseOptions uses https:// scheme exclusively.
-//    In production, enforce certificate pinning via Dio's
-//    SecurityContext or a native plugin (e.g. ssl_pinning_plugin).
-// 2. No Sensitive Data in Logs: LogInterceptor has requestBody: false
-//    to avoid logging credentials. In production, disable
-//    responseBody logging as well.
-// 3. No Hardcoded Secrets: API keys and tokens are stored in
-//    FlutterSecureStorage, never in source code. The mock JWT is
-//    for development only.
-// 4. Input Sanitization: All user input is validated at the form
-//    level before being sent to the API.
-// 5. Certificate Pinning (concept): In production, add a custom
-//    SecurityContext with pinned certificates to Dio's HttpClient.
+// 2. No Sensitive Data in Logs: LogInterceptor has requestBody: false.
+// 3. No Hardcoded Secrets: API keys stored in FlutterSecureStorage.
+// 4. Input Sanitization: validated at the form level before sending.
+// 5. Certificate Pinning (concept): add SecurityContext in production.
 // ══════════════════════════════════════════════════════════════════
 
 /// Centralized HTTP client for all API communication.
-///
-/// Configured with proper timeouts, logging, and error handling.
-/// During development, a [MockInterceptor] returns hardcoded JSON
-/// responses so the app works fully offline.
 class ApiClient {
   late final Dio _dio;
 
@@ -50,14 +38,16 @@ class ApiClient {
     ]);
   }
 
-  /// Generic GET request.
   Future<Response> get(String path) => _dio.get(path);
 
-  /// Generic POST request.
   Future<Response> post(String path, {Map<String, dynamic>? data}) =>
       _dio.post(path, data: data);
 
-  /// GET request that extracts and returns a JSON list.
+  Future<Response> put(String path, {Map<String, dynamic>? data}) =>
+      _dio.put(path, data: data);
+
+  Future<Response> delete(String path) => _dio.delete(path);
+
   Future<List<dynamic>> getList(String path) async {
     final response = await _dio.get(path);
     if (response.data is List) {
@@ -72,13 +62,10 @@ class ApiClient {
 }
 
 /// Intercepts requests and returns mock JSON data with a simulated delay.
-///
-/// Routes handled: /announcements, /events, /timetable.
-/// All other paths pass through to the network (or fail if offline).
 class MockInterceptor extends Interceptor {
   static const _delay = Duration(milliseconds: 500);
 
-  static final _routes = <String, List<Map<String, dynamic>>>{
+  static final _readRoutes = <String, List<Map<String, dynamic>>>{
     '/announcements': mockAnnouncements,
     '/events': mockEvents,
     '/timetable': mockTimetable,
@@ -89,12 +76,30 @@ class MockInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Handle POST /auth/login mock.
+    await Future.delayed(_delay);
+
+    // ── Auth ──────────────────────────────────────────────────────
     if (options.method == 'POST' && options.path == '/auth/login') {
-      await Future.delayed(_delay);
       final data = options.data as Map<String, dynamic>?;
       final email = data?['email'] ?? '';
       final password = data?['password'] ?? '';
+
+      if (email == 'admin@smartcampus.dev' && password == 'admin123') {
+        handler.resolve(
+          Response(
+            requestOptions: options,
+            statusCode: 200,
+            data: {
+              'token': 'mock_admin_jwt_${DateTime.now().millisecondsSinceEpoch}',
+              'email': email,
+              'displayName': 'Campus Admin',
+              'issuedAt': DateTime.now().toIso8601String(),
+              'isAdmin': true,
+            },
+          ),
+        );
+        return;
+      }
 
       if (email == 'student@smartcampus.dev' && password == 'campus123') {
         handler.resolve(
@@ -106,40 +111,97 @@ class MockInterceptor extends Interceptor {
               'email': email,
               'displayName': 'Maxframe',
               'issuedAt': DateTime.now().toIso8601String(),
+              'isAdmin': false,
             },
           ),
         );
-      } else {
-        handler.reject(
-          DioException(
-            requestOptions: options,
-            response: Response(
-              requestOptions: options,
-              statusCode: 401,
-              data: {'error': 'Invalid credentials'},
-            ),
-            type: DioExceptionType.badResponse,
-          ),
-        );
+        return;
       }
-      return;
-    }
 
-    final mockData = _routes[options.path];
-    if (mockData != null) {
-      // Simulate network latency so loading states are visible.
-      await Future.delayed(_delay);
-      handler.resolve(
-        Response(
+      handler.reject(
+        DioException(
           requestOptions: options,
-          statusCode: 200,
-          data: json.decode(json.encode(mockData)),
+          response: Response(
+            requestOptions: options,
+            statusCode: 401,
+            data: {'error': 'Invalid credentials'},
+          ),
+          type: DioExceptionType.badResponse,
         ),
       );
       return;
     }
-    // Not a mocked route — let the request continue.
+
+    // ── Read (GET list) ───────────────────────────────────────────
+    final mockList = _readRoutes[options.path];
+    if (mockList != null && options.method == 'GET') {
+      handler.resolve(
+        Response(
+          requestOptions: options,
+          statusCode: 200,
+          data: json.decode(json.encode(mockList)),
+        ),
+      );
+      return;
+    }
+
+    // ── Admin Write Operations ────────────────────────────────────
+    // POST /announcements, /events, /timetable — create
+    if (options.method == 'POST' && _readRoutes.containsKey(options.path)) {
+      final body = Map<String, dynamic>.from(
+        options.data as Map<String, dynamic>? ?? {},
+      );
+      body['id'] ??= 'admin_${DateTime.now().millisecondsSinceEpoch}';
+      _readRoutes[options.path]!.add(Map<String, dynamic>.from(body));
+      handler.resolve(
+        Response(requestOptions: options, statusCode: 201, data: body),
+      );
+      return;
+    }
+
+    // PUT /announcements/:id, /events/:id, /timetable/:id — update
+    if (options.method == 'PUT') {
+      final match = _matchEntityPath(options.path);
+      if (match != null) {
+        final body = Map<String, dynamic>.from(
+          options.data as Map<String, dynamic>? ?? {},
+        );
+        final list = _readRoutes[match.basePath]!;
+        final idx = list.indexWhere(
+          (e) => e['id']?.toString() == match.id,
+        );
+        if (idx != -1) list[idx] = body;
+        handler.resolve(
+          Response(requestOptions: options, statusCode: 200, data: body),
+        );
+        return;
+      }
+    }
+
+    // DELETE /announcements/:id, /events/:id, /timetable/:id — delete
+    if (options.method == 'DELETE') {
+      final match = _matchEntityPath(options.path);
+      if (match != null) {
+        _readRoutes[match.basePath]!
+            .removeWhere((e) => e['id']?.toString() == match.id);
+        handler.resolve(
+          Response(requestOptions: options, statusCode: 204, data: null),
+        );
+        return;
+      }
+    }
+
     handler.next(options);
+  }
+
+  /// Parses a path like `/announcements/abc123` into its base route and id.
+  ({String basePath, String id})? _matchEntityPath(String path) {
+    for (final base in _readRoutes.keys) {
+      if (path.startsWith('$base/')) {
+        return (basePath: base, id: path.substring(base.length + 1));
+      }
+    }
+    return null;
   }
 }
 

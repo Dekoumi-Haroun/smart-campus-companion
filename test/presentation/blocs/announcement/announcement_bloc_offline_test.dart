@@ -21,6 +21,15 @@ class FakeAnnouncementRepository implements AnnouncementRepository {
     if (error != null) throw error!;
     return result?.where((a) => a.id == id).firstOrNull;
   }
+
+  @override
+  Future<Announcement> createAnnouncement(Announcement a) async => a;
+
+  @override
+  Future<Announcement> updateAnnouncement(Announcement a) async => a;
+
+  @override
+  Future<void> deleteAnnouncement(String id) async {}
 }
 
 final _sampleAnnouncements = [

@@ -30,6 +30,15 @@ class FakeTimetableRepository implements TimetableRepository {
     if (exportError != null) throw exportError!;
     return exportFilePath!;
   }
+
+  @override
+  Future<TimetableItem> createTimetableItem(TimetableItem item) async => item;
+
+  @override
+  Future<TimetableItem> updateTimetableItem(TimetableItem item) async => item;
+
+  @override
+  Future<void> deleteTimetableItem(String id) async {}
 }
 
 final _sampleItems = [

@@ -34,3 +34,19 @@ class AnnouncementError extends AnnouncementState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Emitted after a successful admin CRUD operation.
+///
+/// Extends [AnnouncementLoaded] so all existing [BlocBuilder] checks
+/// that test `state is AnnouncementLoaded` continue to work unmodified.
+class AnnouncementActionSuccess extends AnnouncementLoaded {
+  final String actionMessage;
+
+  const AnnouncementActionSuccess(
+    this.actionMessage,
+    List<Announcement> announcements,
+  ) : super(announcements);
+
+  @override
+  List<Object?> get props => [actionMessage, announcements];
+}

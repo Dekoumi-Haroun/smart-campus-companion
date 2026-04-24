@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -39,7 +40,7 @@ class NotificationService {
 
   /// Initialize the plugin. Must be called once at app startup.
   Future<void> init() async {
-    if (_initialized) return;
+    if (_initialized || kIsWeb) return;
 
     tz.initializeTimeZones();
 
@@ -96,6 +97,7 @@ class NotificationService {
 
   /// Request notification permission on Android 13+ / iOS.
   Future<bool> requestPermission() async {
+    if (kIsWeb) return false;
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -113,6 +115,7 @@ class NotificationService {
   /// The [notificationId] is derived from the timetable item ID so it can be
   /// cancelled individually. The [payload] contains the item ID for deep linking.
   Future<int> scheduleClassReminder(TimetableItem item) async {
+    if (kIsWeb) return -1;
     final notificationId = item.id.hashCode.abs() % 2147483647;
 
     // Build the scheduled date/time for the next occurrence of this class.
@@ -150,6 +153,7 @@ class NotificationService {
 
   /// Cancel a specific scheduled notification.
   Future<void> cancelReminder(int notificationId) async {
+    if (kIsWeb) return;
     await _plugin.cancel(notificationId);
     developer.log(
       'Cancelled reminder id=$notificationId',
@@ -159,6 +163,7 @@ class NotificationService {
 
   /// Cancel all pending notifications.
   Future<void> cancelAll() async {
+    if (kIsWeb) return;
     await _plugin.cancelAll();
     developer.log('Cancelled all notifications', name: 'Notifications');
   }
@@ -169,6 +174,7 @@ class NotificationService {
     required String body,
     String? payload,
   }) async {
+    if (kIsWeb) return;
     const androidDetails = AndroidNotificationDetails(
       _bgChannelId,
       _bgChannelName,
@@ -231,6 +237,9 @@ class NotificationService {
   /// [time] ("HH:mm").
   tz.TZDateTime _nextOccurrence(int dayOfWeek, String time) {
     final parts = time.split(':');
+    if (parts.length < 2) {
+      throw FormatException('Invalid time format for notification scheduling: "$time"');
+    }
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);
 

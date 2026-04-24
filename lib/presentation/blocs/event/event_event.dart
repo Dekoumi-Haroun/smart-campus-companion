@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../domain/entities/event.dart';
+
 sealed class EventEvent extends Equatable {
   const EventEvent();
 
@@ -7,43 +9,61 @@ sealed class EventEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Load all events from the repository.
 class FetchEvents extends EventEvent {
   const FetchEvents();
 }
 
-/// Pull-to-refresh — re-fetches and replaces the list.
 class RefreshEvents extends EventEvent {
   const RefreshEvents();
 }
 
-/// Filter events by search query.
 class SearchEvents extends EventEvent {
   final String query;
-
   const SearchEvents(this.query);
 
   @override
   List<Object?> get props => [query];
 }
 
-/// Toggle the reminder flag for a specific event.
 class ToggleReminder extends EventEvent {
   final String eventId;
-
   const ToggleReminder(this.eventId);
 
   @override
   List<Object?> get props => [eventId];
 }
 
-/// Attach a photo (from camera or gallery) to a specific event.
 class AttachPhoto extends EventEvent {
   final String eventId;
   final String photoPath;
-
   const AttachPhoto(this.eventId, this.photoPath);
 
   @override
   List<Object?> get props => [eventId, photoPath];
+}
+
+// ── Admin CRUD ──
+
+class CreateEvent extends EventEvent {
+  final Event event;
+  const CreateEvent(this.event);
+
+  @override
+  List<Object?> get props => [event];
+}
+
+class UpdateEvent extends EventEvent {
+  final Event event;
+  const UpdateEvent(this.event);
+
+  @override
+  List<Object?> get props => [event];
+}
+
+class DeleteEvent extends EventEvent {
+  final String eventId;
+  const DeleteEvent(this.eventId);
+
+  @override
+  List<Object?> get props => [eventId];
 }
