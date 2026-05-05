@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../presentation/blocs/connectivity/connectivity_cubit.dart';
+import '../../presentation/blocs/connectivity/connectivity_state.dart';
+import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
 
 /// A centered loading spinner with an optional message.
@@ -124,25 +129,53 @@ class EmptyStateWidget extends StatelessWidget {
 }
 
 /// Offline banner shown at the top of screens when there is no connectivity.
-/// (Will be wired to ConnectivityCubit in Sprint 2)
+/// Listens to [ConnectivityCubit] and auto-shows/hides with a slide animation.
 class OfflineBanner extends StatelessWidget {
   const OfflineBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      color: Theme.of(context).colorScheme.error,
-      child: const Text(
-        AppStrings.offlineBanner,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+    return BlocBuilder<ConnectivityCubit, ConnectivityState>(
+      builder: (context, state) {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          transitionBuilder: (child, animation) {
+            return SizeTransition(
+              sizeFactor: animation,
+              axisAlignment: -1,
+              child: child,
+            );
+          },
+          child: state is ConnectivityOffline
+              ? Container(
+                  key: const ValueKey('offline_banner'),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  color: AppColors.warning,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.wifi_off_rounded,
+                        color: AppColors.onWarning,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppStrings.offlineBanner,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: AppColors.onWarning,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(key: ValueKey('online')),
+        );
+      },
     );
   }
 }

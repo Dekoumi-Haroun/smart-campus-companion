@@ -1,3 +1,4 @@
+
 name: smart_campus
 description: SmartCampus Companion — A mobile app demonstrating mobile OS concepts.
 publish_to: 'none'
@@ -9,12 +10,41 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   cupertino_icons: ^1.0.8
+  dio: ^5.4.0
+  flutter_bloc: ^9.1.0
+  equatable: ^2.0.7
+  intl: ^0.20.2
+  connectivity_plus: ^6.0.0
+  sqflite: ^2.4.2
+  sqflite_common_ffi_web: ^0.4.5+2
+  path: ^1.9.0
+  shared_preferences: ^2.3.0
+  flutter_secure_storage: ^9.2.4
+  path_provider: ^2.1.5
+  permission_handler: ^11.4.0
+  image_picker: ^1.1.2
+  geolocator: ^13.0.2
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  sensors_plus: ^6.1.1
+  flutter_local_notifications: ^18.0.1
+  workmanager: ^0.9.0+3
+  timezone: ^0.10.0
+  local_auth: ^2.3.0
+  cached_network_image: ^3.4.1
+  share_plus: ^12.0.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  sqflite_common_ffi: ^2.4.0+2
+  bloc_test: ^10.0.0
+  mocktail: ^1.0.4
 
 flutter:
   uses-material-design: true

@@ -44,4 +44,7 @@ class AppColors {
   static const Color tagSports = Color(0xFF66BB6A);
   static const Color tagGeneral = Color(0xFFFF7043);
   static const Color tagUrgent = Color(0xFFEF5350);
+  static const Color tagAdministration = Color(0xFF8D6E63);
+  static const Color tagIt = Color(0xFF00ACC1);
+  static const Color tagWellness = Color(0xFFAB47BC);
 }

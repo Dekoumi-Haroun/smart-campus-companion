@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_strings.dart';
-import '../screens/home/home_screen.dart';
+import '../../core/widgets/common_widgets.dart';
 import '../screens/announcements/announcements_screen.dart';
+import '../screens/campus_map/campus_map_screen.dart';
 import '../screens/events/events_screen.dart';
+import '../screens/home/home_screen.dart';
 import '../screens/settings/settings_screen.dart';
 
 /// The main shell widget that hosts the [BottomNavigationBar] and
@@ -11,20 +14,30 @@ import '../screens/settings/settings_screen.dart';
 /// Using [IndexedStack] ensures each tab's state is preserved when
 /// the user switches between tabs (scroll position, form inputs, etc.).
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  final int initialTab;
+
+  const MainShell({super.key, this.initialTab = 0});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  State<MainShell> createState() => MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
-  int _currentIndex = 0;
+class MainShellState extends State<MainShell> {
+  /// Allows child widgets to switch tabs programmatically.
+  void switchTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
-  // The four tab screens — order matches the BottomNavigationBar items.
+  late int _currentIndex = widget.initialTab;
+
+  // The five tab screens — order matches the BottomNavigationBar items.
   final List<Widget> _screens = const [
     HomeScreen(),
     AnnouncementsScreen(),
     EventsScreen(),
+    CampusMapScreen(),
     SettingsScreen(),
   ];
 
@@ -51,8 +64,14 @@ class _MainShellState extends State<MainShell> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        // IndexedStack keeps all children alive but only shows the active one.
-        body: IndexedStack(index: _currentIndex, children: _screens),
+        body: Column(
+          children: [
+            const OfflineBanner(),
+            Expanded(
+              child: IndexedStack(index: _currentIndex, children: _screens),
+            ),
+          ],
+        ),
         bottomNavigationBar: Semantics(
           label: 'Main navigation',
           child: BottomNavigationBar(
@@ -76,6 +95,12 @@ class _MainShellState extends State<MainShell> {
                 activeIcon: Icon(Icons.event_rounded),
                 label: AppStrings.navEvents,
                 tooltip: 'Campus events',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.map_outlined),
+                activeIcon: Icon(Icons.map_rounded),
+                label: AppStrings.navMap,
+                tooltip: 'Campus map',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings_outlined),
